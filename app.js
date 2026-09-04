@@ -2,6 +2,8 @@
   const TARGET = 1450;
   const CYCLE_START = '2026-09-07';
   const TARGET_MACRO = {p:76,c:181,f:47};
+  const FIBER_TARGET = 30;
+  const breadOverridePrefix='breadOverrideDashboard1450';
 
   const I=(name,qty,unit,category)=>({name,qty,unit,category});
   const K=(p,c,f)=>Math.round(p*4+c*4+f*9);
@@ -14,13 +16,20 @@
   const dayIndex={lun:0,mar:1,mer:2,gio:3,ven:4,sab:5,dom:6};
 
   const weekMeta={
-    1:{range:'7–13 settembre',theme:'Settimana 1 · matrice La Brocca'},
-    2:{range:'14–20 settembre',theme:'Settimana 2 · matrice La Brocca'},
-    3:{range:'21–27 settembre',theme:'Settimana 3 · matrice La Brocca'},
-    4:{range:'28 settembre–4 ottobre',theme:'Settimana 4 · matrice La Brocca'}
+    1:{range:'7–13 settembre',theme:'Programmazione settimanale'},
+    2:{range:'14–20 settembre',theme:'Programmazione settimanale'},
+    3:{range:'21–27 settembre',theme:'Programmazione settimanale'},
+    4:{range:'28 settembre–4 ottobre',theme:'Programmazione settimanale'}
   };
 
-  // Quota pane "nell'arco della giornata" ripresa dal piano originale.
+  const weekDates={
+    1:{lun:{n:7,m:'set'},mar:{n:8,m:'set'},mer:{n:9,m:'set'},gio:{n:10,m:'set'},ven:{n:11,m:'set'},sab:{n:12,m:'set'},dom:{n:13,m:'set'}},
+    2:{lun:{n:14,m:'set'},mar:{n:15,m:'set'},mer:{n:16,m:'set'},gio:{n:17,m:'set'},ven:{n:18,m:'set'},sab:{n:19,m:'set'},dom:{n:20,m:'set'}},
+    3:{lun:{n:21,m:'set'},mar:{n:22,m:'set'},mer:{n:23,m:'set'},gio:{n:24,m:'set'},ven:{n:25,m:'set'},sab:{n:26,m:'set'},dom:{n:27,m:'set'}},
+    4:{lun:{n:28,m:'set'},mar:{n:29,m:'set'},mer:{n:30,m:'set'},gio:{n:1,m:'ott'},ven:{n:2,m:'ott'},sab:{n:3,m:'ott'},dom:{n:4,m:'ott'}}
+  };
+
+  // Quota pane giornaliera.
   const bread={
     1:{lun:90,mar:80,mer:110,gio:80,ven:90,sab:30,dom:70},
     2:{lun:100,mar:80,mer:90,gio:80,ven:110,sab:30,dom:70},
@@ -28,6 +37,63 @@
     4:{lun:80,mar:80,mer:90,gio:70,ven:90,sab:30,dom:70}
   };
   const breadMacro=q=>({p:0.085*q,c:0.49*q,f:0.025*q,kcal:K(.085*q,.49*q,.025*q)});
+
+  const breadOverrideKey=(w,d)=>`${breadOverridePrefix}_w${w}_${d}`;
+  const getBreadQty=(w,d)=>{const v=Number(localStorage.getItem(breadOverrideKey(w,d)));return Number.isFinite(v)&&v>0?v:bread[w][d];};
+  const setBreadQty=(w,d,v)=>{if(v==null||v===''){localStorage.removeItem(breadOverrideKey(w,d));return;}const n=Number(v);if(Number.isFinite(n)&&n>0)localStorage.setItem(breadOverrideKey(w,d),String(Math.round(n)));};
+
+  const dayFullDate=(w,d)=>{
+    const dt=weekDates[w][d], label=days.find(x=>x.id===d)?.label || '';
+    const month=dt.m==='set'?'settembre':'ottobre';
+    return `${label.toUpperCase()}, ${dt.n} ${month}`;
+  };
+
+  function estimateFiberIngredient(x){
+    const name=(x.name||'').toLowerCase(), cat=x.category||'', q=Number(x.qty)||0, unit=x.unit||'g';
+    if(cat==='Verdura'){
+      return unit==='g' ? q*0.022 : q*2.2;
+    }
+    if(cat==='Frutta'){
+      if(unit==='pz'){
+        if(name.includes('pera')) return 4.5*q;
+        if(name.includes('mela')) return 3.8*q;
+        if(name.includes('kiwi')) return 2.3*q;
+        if(name.includes('arancia')) return 2.8*q;
+        if(name.includes('pesca')) return 2*q;
+        return 2.5*q;
+      }
+      if(name.includes('fragole') || name.includes('frutti')) return q*0.02;
+      if(name.includes('banana')) return q*0.026;
+      if(name.includes('cilieg')) return q*0.016;
+      return q*0.02;
+    }
+    if(cat==='Cereali e pane'){
+      if(name.includes('avena') || name.includes('muesli')) return q*0.09;
+      if(name.includes('pane') || name.includes('segale') || name.includes('frisella') || name.includes('piadina')) return q*0.05;
+      if(name.includes('mais')) return q*0.04;
+      if(name.includes('pasta')) return q*0.03;
+      if(name.includes('orzo') || name.includes('farro')) return q*0.06;
+      if(name.includes('riso')) return q*0.015;
+      return q*0.035;
+    }
+    return 0;
+  }
+
+  function estimateFiberForSelection(w,d,sel){
+    let fiber = estimateFiberIngredient({name:'Pane integrale', qty:getBreadQty(w,d), unit:'g', category:'Cereali e pane'});
+    ['breakfast','snack','lunch','afternoon','dinner'].forEach(id=>{
+      if(d==='sab'&&id==='dinner'){(pizza.ingredients||[]).forEach(x=>fiber+=estimateFiberIngredient(x)); return;}
+      const opts=mealOptions(w,d,id), idx=sel[id];
+      if(Number.isInteger(idx) && opts[idx]) (opts[idx].ingredients||[]).forEach(x=>fiber+=estimateFiberIngredient(x));
+    });
+    return Math.round(fiber*10)/10;
+  }
+
+  function toggleMealCard(card){
+    card.classList.toggle('open');
+    const btn=card.querySelector('.meal-toggle');
+    if(btn) btn.setAttribute('aria-expanded', card.classList.contains('open') ? 'true' : 'false');
+  }
 
   // Macro orientativi per slot. Le tre alternative dello stesso slot sono volutamente molto vicine.
   const M={
@@ -329,7 +395,7 @@
     4:{lun:[cherries(),kiwi(),berries()],mar:[apple(),kiwi(),berries()],mer:[peach(),kiwi(),berries()],gio:[cherries(),kiwi(),berries()],ven:[pear(),kiwi(),orange()],sab:[kiwi(),orange(),peach()],dom:[kiwi(),orange(),peach()]}
   };
 
-  // Domenica: nell'originale è libera; nell'app manteniamo un solo pasto libero.
+  // Domenica: un solo pasto libero.
   const sundayMain = {
     1:{lunch:optSet('grainMeat',[
       {name:'Riso con pollo e zucchine',detail:'Riso 75 g · pollo 80 g · zucchine 220 g · EVO 14 g',ingredients:[I('Riso',75,'g','Cereali e pane'),I('Pollo',80,'g','Carne, pesce e uova'),I('Zucchine',220,'g','Verdura'),I('Olio EVO',14,'g','Condimenti')]},
@@ -357,9 +423,11 @@
   const list=document.getElementById('mealList');
   const weekend=document.getElementById('weekendNotice');
   const progressKey='bodyProgress_v1';
-  const purchasedKey=w=>`shoppingPurchased_labrocca1450_w${w}`;
+  const purchasedKey=w=>`shoppingPurchased_dashboard1450_w${w}`;
+  const legacyPurchasedKey=w=>`shoppingPurchased_labrocca1450_w${w}`;
   const freeMealKey='shoppingSundayFree_v1';
-  const storeKey=(w,d)=>`pianoLabrocca1450_w${w}_${d}`;
+  const storeKey=(w,d)=>`pianoDashboard1450_w${w}_${d}`;
+  const legacyStoreKey=(w,d)=>`pianoLabrocca1450_w${w}_${d}`;
 
   const currentWeek=()=>Number(weekSelect.value);
   const currentDay=()=>daySelect.value;
@@ -397,7 +465,13 @@
   }
 
   function getStoredSelections(w,d){
-    try{return JSON.parse(localStorage.getItem(storeKey(w,d))||'{}')||{}}catch(e){return {}}
+    try{
+      const current=localStorage.getItem(storeKey(w,d));
+      const legacy=localStorage.getItem(legacyStoreKey(w,d));
+      const parsed=JSON.parse(current||legacy||'{}')||{};
+      if(!current&&legacy)localStorage.setItem(storeKey(w,d),JSON.stringify(parsed));
+      return parsed;
+    }catch(e){return {}}
   }
   function getSelections(){
     const out={};
@@ -409,6 +483,37 @@
     return out;
   }
 
+
+  function renderCalendar(){
+    const w=currentWeek(), d=currentDay();
+    const range=document.getElementById('calendarRange');
+    const wrap=document.getElementById('calendarDays');
+    if(!range||!wrap)return;
+    range.textContent=weekMeta[w].range;
+    wrap.innerHTML=days.map(day=>{
+      const dt=weekDates[w][day.id];
+      return `<button type="button" class="calendar-day ${day.id===d?'active':''}" data-day="${day.id}" aria-pressed="${day.id===d?'true':'false'}">
+        <span>${day.label.slice(0,3).toUpperCase()}</span>
+        <strong>${dt.n}</strong>
+        <small>${dt.m}</small>
+      </button>`;
+    }).join('');
+    wrap.querySelectorAll('.calendar-day').forEach(btn=>btn.addEventListener('click',()=>{
+      daySelect.value=btn.dataset.day;
+      renderMeals();
+      renderShopping();
+    }));
+  }
+
+  function shiftWeek(delta){
+    let w=currentWeek()+delta;
+    if(w<1)w=4;
+    if(w>4)w=1;
+    weekSelect.value=String(w);
+    renderMeals();
+    renderShopping();
+  }
+
   function renderScheduleHeader(){
     const w=currentWeek();
     document.getElementById('cycleLabel').textContent=`Settimana ${w} di 4 · ${weekMeta[w].range}`;
@@ -417,48 +522,98 @@
       ? 'Dal 5 ottobre il ciclo riparte automaticamente dalla Settimana 1.'
       : `Ciclo ${cycle}: dopo la Settimana 4 si torna alla 1.`;
     document.getElementById('shoppingWeekLabel').textContent=`settimana ${w}`;
+    renderCalendar();
   }
+
 
   function renderMeals(){
     const w=currentWeek(),d=currentDay(),sel=getStoredSelections(w,d);
     const slots=[
-      ['breakfast','Colazione'],['snack','Metà mattina'],['lunch','Pranzo'],['afternoon','Merenda'],['dinner','Cena']
+      ['breakfast','Colazione','☀️'],
+      ['snack','Metà mattina','🍎'],
+      ['lunch','Pranzo','🌤️'],
+      ['afternoon','Merenda','🍐'],
+      ['dinner','Cena','🌙']
     ];
-    list.innerHTML=slots.map(([id,title])=>{
+    list.innerHTML=slots.map(([id,title,icon],pos)=>{
       const opts=mealOptions(w,d,id);
       if(d==='sab'&&id==='dinner'){
         const o=opts[0];
-        return `<article class="meal-card fixed-meal"><div class="meal-title"><h2>${title}</h2><span class="meal-target">fissa</span></div>
-          <div class="option-body"><span class="option-letter">🍕</span><span class="option-text"><strong>${o.name}</strong><small>${o.detail}</small><span class="source-badge">Piano originale</span></span>
-          <span class="option-macro"><b>${o.kcal} kcal</b>P ${o.p} · C ${o.c} · G ${o.f}</span></div></article>`;
+        return `<article class="meal-card fixed-meal open" data-meal="${id}">
+          <button type="button" class="meal-head meal-toggle" aria-expanded="true">
+            <div class="meal-head-main"><span class="meal-icon">${icon}</span><div><span class="meal-name">${title}</span><small>${o.kcal} kcal</small></div></div>
+            <span class="meal-caret">⌃</span>
+          </button>
+          <div class="meal-body"><div class="option-list single-option">
+            <label class="meal-option">
+              <input type="radio" name="${id}" value="0" checked disabled>
+              <span class="option-body fixed">
+                <span class="option-letter">🍕</span>
+                <span class="option-text"><strong>${o.name}</strong><small>${o.detail}</small><span class="source-badge">Consigliata</span></span>
+                <span class="option-macro"><b>${o.kcal} kcal</b></span>
+              </span>
+            </label>
+          </div></div></article>`;
       }
-      return `<article class="meal-card" data-meal="${id}">
-        <div class="meal-title"><div><h2>${title}</h2><div class="week-theme">${weekMeta[w].theme}</div></div><span class="meal-target">${id==='lunch'||id==='dinner'?'programmazione del giorno':'rotazione prevista'}</span></div>
-        <div class="option-list">${opts.map((o,i)=>`<label class="meal-option">
-          <input type="radio" name="${id}" value="${i}" ${sel[id]===i?'checked':''} aria-label="${title}: alternativa ${String.fromCharCode(65+i)}">
-          <span class="option-body"><span class="option-letter">${String.fromCharCode(65+i)}</span>
-          <span class="option-text"><strong>${o.name}</strong><small>${o.detail}</small>${o.source?'<span class="source-badge">Piano originale</span>':''}</span>
-          <span class="option-macro"><b>${o.kcal} kcal</b>P ${o.p} · C ${o.c} · G ${o.f}</span></span>
-        </label>`).join('')}</div></article>`;
+      const open = pos===0 ? ' open' : '';
+      const expanded = pos===0 ? 'true' : 'false';
+      const chosenIdx = Number.isInteger(sel[id]) ? sel[id] : 0;
+      const chosenKcal = opts[chosenIdx]?.kcal || opts[0]?.kcal || '—';
+      return `<article class="meal-card${open}" data-meal="${id}">
+        <button type="button" class="meal-head meal-toggle" aria-expanded="${expanded}">
+          <div class="meal-head-main"><span class="meal-icon">${icon}</span><div><span class="meal-name">${title}</span><small>${chosenKcal} kcal</small></div></div>
+          <span class="meal-caret">${pos===0?'⌃':'⌄'}</span>
+        </button>
+        <div class="meal-body">
+          <div class="option-list">${opts.map((o,i)=>`<label class="meal-option">
+            <input type="radio" name="${id}" value="${i}" ${sel[id]===i || (!Number.isInteger(sel[id]) && i===0)?'checked':''} aria-label="${title}: alternativa ${String.fromCharCode(65+i)}">
+            <span class="option-body">
+              <span class="option-top"><span class="option-letter">${String.fromCharCode(65+i)}</span><span class="option-check">${(sel[id]===i || (!Number.isInteger(sel[id]) && i===0))?'✓':'○'}</span></span>
+              <span class="option-text"><strong>${o.name}</strong><small>${o.detail}</small>${o.source?'<span class="source-badge">Consigliata</span>':''}</span>
+              <span class="option-cal">${o.kcal} kcal</span>
+            </span>
+          </label>`).join('')}</div>
+        </div>
+      </article>`;
     }).join('');
-    list.querySelectorAll('input').forEach(el=>el.addEventListener('change',()=>{autoSave();updateTotals();renderShopping();}));
+
+    list.querySelectorAll('input').forEach(el=>el.addEventListener('change',()=>{
+      autoSave();
+      const card=el.closest('.meal-card');
+      const headSmall=card?.querySelector('.meal-head small');
+      const checked=card?.querySelector('input:checked');
+      const opts=mealOptions(w,d,card?.dataset.meal);
+      if(headSmall && checked && opts[Number(checked.value)]) headSmall.textContent=`${opts[Number(checked.value)].kcal} kcal`;
+      card?.querySelectorAll('.option-check').forEach((n,ix)=>n.textContent=ix===Number(el.value)?'✓':'○');
+      updateTotals();
+      renderShopping();
+    }));
+    list.querySelectorAll('.meal-toggle').forEach(btn=>btn.addEventListener('click',()=>{
+      const card=btn.closest('.meal-card');
+      toggleMealCard(card);
+      card.querySelector('.meal-caret').textContent=card.classList.contains('open')?'⌃':'⌄';
+    }));
+    const toggleDayView=document.getElementById('toggleDayView'); if(toggleDayView) toggleDayView.textContent='Vedi giornata ›';
     updateTotals(); updateWeekend(); renderScheduleHeader();
   }
 
   function updateWeekend(){
+
     const d=currentDay();
     if(d==='sab'){
       weekend.hidden=false;
-      weekend.innerHTML='🍕 <strong>Sabato:</strong> pizza Margherita 210 g fissa e quota pane ridotta a 30 g, come nel piano originale.';
+      weekend.innerHTML='🍕 <strong>Sabato:</strong> pizza Margherita 210 g fissa e quota pane ridotta a 30 g, come previsto dalla programmazione.';
     }else if(d==='dom'){
       weekend.hidden=false;
-      weekend.innerHTML='🍽️ <strong>Domenica:</strong> il piano originale prevedeva la giornata libera. Qui manteniamo la tua modifica: <strong>un solo pasto libero</strong>, scelto nella sezione Spesa.';
+      weekend.innerHTML='🍽️ <strong>Domenica:</strong> è previsto <strong>un solo pasto libero</strong>, scelto nella sezione Spesa.';
     }else weekend.hidden=true;
   }
 
+
   function updateTotals(){
     const w=currentWeek(),d=currentDay(),sel=getSelections();
-    const bm=breadMacro(bread[w][d]);
+    const breadQty=getBreadQty(w,d);
+    const bm=breadMacro(breadQty);
     let p=bm.p,c=bm.c,f=bm.f,count=0,required=5;
     ['breakfast','snack','lunch','afternoon','dinner'].forEach(id=>{
       if(d==='sab'&&id==='dinner'){const o=pizza;p+=o.p;c+=o.c;f+=o.f;count++;return;}
@@ -466,11 +621,16 @@
       if(Number.isInteger(idx)&&opts[idx]){const o=opts[idx];p+=o.p;c+=o.c;f+=o.f;count++;}
     });
     const kcal=K(p,c,f);
-    document.getElementById('breadQty').textContent=`${bread[w][d]} g`;
+    const fiber=estimateFiberForSelection(w,d,sel);
+
+    document.getElementById('dayTitle').textContent=`OGGI, ${dayFullDate(w,d).split(', ')[1].toUpperCase()}`;
+    document.getElementById('breadQty').textContent=`${breadQty} g`;
+    document.getElementById('kcalTarget').textContent=TARGET;
     document.getElementById('kcalTotal').textContent=count?kcal:'—';
     document.getElementById('proteinTotal').textContent=count?(Math.round(p*10)/10).toString().replace('.',','):'—';
     document.getElementById('carbTotal').textContent=count?(Math.round(c*10)/10).toString().replace('.',','):'—';
     document.getElementById('fatTotal').textContent=count?(Math.round(f*10)/10).toString().replace('.',','):'—';
+    document.getElementById('fiberTotal').textContent=count?fiber.toString().replace('.',','):'—';
 
     const ek=p*4+c*4+f*9;
     const cp=ek?Math.round(c*4/ek*100):0,pp=ek?Math.round(p*4/ek*100):0,fp=ek?100-cp-pp:0;
@@ -478,19 +638,23 @@
     document.getElementById('proteinPct').textContent=count?`${pp}%`:'—';
     document.getElementById('fatPct').textContent=count?`${fp}%`:'—';
     const dist=Math.abs(cp-50)+Math.abs(pp-21)+Math.abs(fp-29);
-    document.getElementById('ratioStatus').textContent=count===required?(dist<=6?'coerente':'vicino al target'):'parziale';
+    const ratio = document.getElementById('ratioStatus');
+    if(ratio) ratio.textContent=count===required?(dist<=6?'coerente':'vicino al target'):'parziale';
 
     const fill=document.getElementById('kcalProgress'),status=document.getElementById('statusText');
-    fill.style.width=count?`${Math.min(100,Math.round(kcal/TARGET*100))}%`:'0%';
-    if(count<required){status.textContent=`${count}/${required} pasti scelti · pane incluso`;fill.style.background='var(--accent2)';}
-    else{
-      const dlt=kcal-TARGET;
-      status.textContent=Math.abs(dlt)<=70?`Area target (${dlt>=0?'+':''}${dlt} kcal)`:(dlt<0?`${Math.abs(dlt)} kcal sotto target`:`${dlt} kcal sopra target`);
-      fill.style.background=Math.abs(dlt)<=70?'var(--green)':Math.abs(dlt)<=110?'var(--amber)':'var(--danger)';
+    const pct=count?Math.min(100,Math.round(kcal/TARGET*100)):0;
+    fill.style.width=`${pct}%`;
+    if(count<required){
+      status.textContent=`${pct}% del tuo obiettivo`;
+      fill.style.background='linear-gradient(90deg,#e18d72,#f0c39a)';
+    }else{
+      status.textContent=`${pct}% del tuo obiettivo`;
+      fill.style.background='linear-gradient(90deg,#d97d60,#eab28b)';
     }
   }
 
-  function autoSave(){localStorage.setItem(storeKey(currentWeek(),currentDay()),JSON.stringify(getSelections()));}
+  function autoSave(){
+localStorage.setItem(storeKey(currentWeek(),currentDay()),JSON.stringify(getSelections()));}
   function save(){autoSave();flash('Scelte salvate');renderShopping();}
   function reset(){localStorage.removeItem(storeKey(currentWeek(),currentDay()));renderMeals();flash('Giorno azzerato');renderShopping();}
   function flash(t){const m=document.getElementById('saveMessage');m.textContent=t;setTimeout(()=>m.textContent='',1600);}
@@ -505,7 +669,15 @@
 
   // SHOPPING
   function getFreeMeal(){return localStorage.getItem(freeMealKey)==='dinner'?'dinner':'lunch';}
-  function getPurchased(w){try{return JSON.parse(localStorage.getItem(purchasedKey(w))||'{}')||{}}catch(e){return {}}}
+  function getPurchased(w){
+    try{
+      const current=localStorage.getItem(purchasedKey(w));
+      const legacy=localStorage.getItem(legacyPurchasedKey(w));
+      const parsed=JSON.parse(current||legacy||'{}')||{};
+      if(!current&&legacy)localStorage.setItem(purchasedKey(w),JSON.stringify(parsed));
+      return parsed;
+    }catch(e){return {}}
+  }
   function setPurchased(w,v){localStorage.setItem(purchasedKey(w),JSON.stringify(v));}
   function pKey(x){return `${x.category}|${x.name}|${x.unit}`;}
   function fmtQty(q,u){q=Math.round(q*10)/10;if(u==='g'&&q>=1000)return `${(q/1000).toFixed(q%1000===0?0:2).replace('.',',')} kg`;if(u==='ml'&&q>=1000)return `${(q/1000).toFixed(q%1000===0?0:2).replace('.',',')} l`;return `${Number.isInteger(q)?q:q.toFixed(1).replace('.',',')} ${u}`;}
@@ -514,7 +686,7 @@
     const w=currentWeek(),free=getFreeMeal(),map=new Map(),missing=[];let selected=0,required=33;
     const add=x=>{const k=pKey(x);if(!map.has(k))map.set(k,{...x,qty:0});map.get(k).qty+=x.qty;};
     days.forEach(day=>{
-      add(I('Pane integrale / lievitazione naturale',bread[w][day.id],'g','Cereali e pane'));
+      add(I('Pane integrale / lievitazione naturale',getBreadQty(w,day.id),'g','Cereali e pane'));
       const sel=getStoredSelections(w,day.id);
       ['breakfast','snack','lunch','afternoon','dinner'].forEach(id=>{
         if(day.id==='sab'&&id==='dinner'){pizza.ingredients.forEach(add);return;}
@@ -565,7 +737,9 @@
   renderMeals();
   document.querySelectorAll('.tab-btn').forEach(b=>b.addEventListener('click',()=>setTab(b.dataset.tab)));
   weekSelect.addEventListener('change',()=>{renderMeals();renderShopping();});
-  daySelect.addEventListener('change',renderMeals);
+  document.getElementById('prevWeek').addEventListener('click',()=>shiftWeek(-1));
+  document.getElementById('nextWeek').addEventListener('click',()=>shiftWeek(1));
+  daySelect.addEventListener('change',()=>{renderMeals();renderShopping();});
   document.getElementById('saveDay').addEventListener('click',save);
   document.getElementById('resetDay').addEventListener('click',reset);
   document.querySelectorAll('.seg-btn').forEach(btn=>btn.addEventListener('click',()=>{document.querySelectorAll('.seg-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');renderVeg(btn.dataset.season);}));
@@ -573,6 +747,35 @@
   document.getElementById('clearPurchased').addEventListener('click',()=>{localStorage.removeItem(purchasedKey(currentWeek()));renderShopping();});
   const form=document.getElementById('measureForm');form.measureDate.value=todayISO();form.addEventListener('submit',saveMeasurement);
   document.getElementById('metricSelect').addEventListener('change',renderProgress);
+
+  const breadBtn=document.getElementById('breadModifyBtn');
+  if(breadBtn) breadBtn.addEventListener('click',()=>{
+    const w=currentWeek(),d=currentDay(),base=bread[w][d],current=getBreadQty(w,d);
+    const v=prompt(`Pane di oggi in grammi. Premi OK per salvare oppure lascia vuoto per tornare al valore base di ${base} g.`, String(current));
+    if(v===null) return;
+    if(String(v).trim()===''){ setBreadQty(w,d,''); renderMeals(); renderShopping(); return; }
+    const n=Number(String(v).replace(',','.'));
+    if(Number.isFinite(n) && n>0){ setBreadQty(w,d,n); renderMeals(); renderShopping(); }
+  });
+
+  const detailBtn=document.getElementById('detailBtn');
+  if(detailBtn) detailBtn.addEventListener('click',()=>document.getElementById('macroBreakdown')?.scrollIntoView({behavior:'smooth',block:'center'}));
+
+  const toggleDayView=document.getElementById('toggleDayView');
+  if(toggleDayView) toggleDayView.addEventListener('click',()=>{
+    const cards=[...document.querySelectorAll('#mealList .meal-card')];
+    const allOpen=cards.every(c=>c.classList.contains('open'));
+    cards.forEach((card,idx)=>{
+      if(allOpen && idx>0) card.classList.remove('open');
+      else card.classList.add('open');
+      const btn=card.querySelector('.meal-toggle');
+      if(btn) btn.setAttribute('aria-expanded', card.classList.contains('open') ? 'true':'false');
+      const caret=card.querySelector('.meal-caret');
+      if(caret) caret.textContent=card.classList.contains('open') ? '⌃' : '⌄';
+    });
+    toggleDayView.textContent=allOpen?'Vedi giornata ›':'Chiudi giornata ‹';
+  });
+
   renderProgress();renderShopping();
   if('serviceWorker'in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('sw.js').catch(()=>{});
 })();

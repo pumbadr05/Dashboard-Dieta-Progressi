@@ -4,112 +4,134 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="theme-color" content="#7a6f63" />
-  <meta name="description" content="Dashboard alimentare 1450 kcal con schema macro La Brocca 50/21/29, spesa dinamica e tracking corporeo." />
+  <meta name="description" content="Dashboard alimentare con programmazione su 4 settimane, lista della spesa dinamica e tracking dei progressi." />
   <link rel="manifest" href="manifest.webmanifest" />
   <link rel="icon" href="icons/icon-192.png" />
   <link rel="apple-touch-icon" href="icons/icon-192.png" />
   <link rel="stylesheet" href="styles.css" />
-  <title>Dashboard alimentare La Brocca 1450</title>
+  <title>Dashboard alimentare</title>
 </head>
 <body>
   <main class="app-shell">
     <header class="hero">
       <div>
-        <p class="eyebrow">PIANO MODULARE · LA BROCCA · TARGET 1450 KCAL</p>
+          <div class="brand-row"><img src="icons/icon-192.png" alt="" class="brand-icon">
         <h1>Dashboard alimentare</h1>
-        <p class="subtitle">Programmazione su 4 settimane: ogni giorno ha pasti e alternative diversi, mantenendo lo schema La Brocca 50% carboidrati · 21% proteine · 29% grassi.</p>
+        <p class="subtitle">Il tuo percorso per rinascere come una fenice, ogni giorno.</p></div>
       </div>
     </header>
+<section id="mealsPanel" class="tab-panel">
+      <section class="calendar-card" aria-label="Calendario settimanale">
+        <div class="calendar-head">
+          <button type="button" id="prevWeek" class="calendar-nav" aria-label="Settimana precedente">‹</button>
+          <div>
+            <span class="calendar-eyebrow">SETTIMANA</span>
+            <strong id="calendarRange">7–13 settembre</strong>
+          </div>
+          <button type="button" id="nextWeek" class="calendar-nav" aria-label="Settimana successiva">›</button>
+        </div>
 
-    <nav class="app-tabs" aria-label="Sezioni dell'app">
-      <button type="button" class="tab-btn active" data-tab="meals">🍽️ Pasti</button>
-      <button type="button" class="tab-btn" data-tab="shopping">🛒 Spesa</button>
-      <button type="button" class="tab-btn" data-tab="progress">📈 Progressi</button>
-    </nav>
+        <div id="calendarDays" class="calendar-days"></div>
 
-    <section id="mealsPanel" class="tab-panel">
-      <div class="schedule-selectors">
-        <label class="schedule-field" for="weekSelect"><span>Settimana</span>
-          <select id="weekSelect" aria-label="Seleziona la settimana">
-            <option value="1">Settimana 1 · 7–13 settembre</option>
-            <option value="2">Settimana 2 · 14–20 settembre</option>
-            <option value="3">Settimana 3 · 21–27 settembre</option>
-            <option value="4">Settimana 4 · 28 settembre–4 ottobre</option>
+        <div class="calendar-meta">
+          <strong id="cycleLabel">Settimana 1 di 4 · 7–13 settembre</strong>
+          <span id="cycleNote">Dal 5 ottobre il ciclo riparte automaticamente dalla Settimana 1.</span>
+        </div>
+
+        <div class="logic-controls" aria-hidden="true">
+          <label for="weekSelect">Settimana</label>
+          <select id="weekSelect">
+            <option value="1">1 · 7–13 settembre</option>
+            <option value="2">2 · 14–20 settembre</option>
+            <option value="3">3 · 21–27 settembre</option>
+            <option value="4">4 · 28 settembre–4 ottobre</option>
           </select>
-        </label>
-        <label class="schedule-field" for="daySelect"><span>Giorno</span>
-          <select id="daySelect" aria-label="Seleziona il giorno">
+
+          <label for="daySelect">Giorno</label>
+          <select id="daySelect">
             <option value="lun">Lunedì</option><option value="mar">Martedì</option><option value="mer">Mercoledì</option>
             <option value="gio">Giovedì</option><option value="ven">Venerdì</option><option value="sab">Sabato</option><option value="dom">Domenica</option>
           </select>
-        </label>
-      </div>
-      <section class="cycle-panel">
-        <div><p class="eyebrow">CICLO DI 4 SETTIMANE</p><strong id="cycleLabel">Settimana 1 di 4</strong></div>
-        <p id="cycleNote" class="micro">Dal 5 ottobre il ciclo riparte automaticamente dalla Settimana 1.</p>
-      </section>
-
-      <section class="summary-grid" aria-label="Riepilogo nutrizionale">
-        <article class="summary-card calories">
-          <span class="label">Kcal stimate</span>
-          <strong id="kcalTotal">—</strong>
-          <span class="target">target ≈ 1450</span>
-        </article>
-        <article class="summary-card"><span class="label">Proteine</span><strong id="proteinTotal">—</strong><span class="target">g</span></article>
-        <article class="summary-card"><span class="label">Carboidrati</span><strong id="carbTotal">—</strong><span class="target">g</span></article>
-        <article class="summary-card"><span class="label">Grassi</span><strong id="fatTotal">—</strong><span class="target">g</span></article>
-      </section>
-
-      <section class="progress-panel" aria-label="Scostamento dal target calorico">
-        <div class="progress-copy"><span>Bilancio giornaliero</span><strong id="statusText">Seleziona le alternative</strong></div>
-        <div class="progress-track"><div id="kcalProgress" class="progress-fill"></div></div>
-        <p class="micro">Target di riferimento: ≈1450 kcal · C ≈181 g · P ≈76 g · G ≈47 g. Le kcal sono calcolate direttamente dai macro stimati.</p>
-      </section>
-
-      <section class="macro-ratio-panel" aria-label="Schema macro La Brocca">
-        <div class="ratio-head">
-          <div><p class="eyebrow">SCHEMA LA BROCCA</p><h2>50% C · 21% P · 29% G</h2></div>
-          <strong id="ratioStatus">—</strong>
-        </div>
-        <div class="ratio-grid">
-          <div><span>Carboidrati</span><strong id="carbPct">—</strong><small>target 50%</small></div>
-          <div><span>Proteine</span><strong id="proteinPct">—</strong><small>target 21%</small></div>
-          <div><span>Grassi</span><strong id="fatPct">—</strong><small>target 29%</small></div>
         </div>
       </section>
 
-      <section class="bread-panel" aria-label="Quota pane giornaliera">
-        <div><p class="eyebrow">ARCO DELLA GIORNATA</p><h2>Quota pane giornaliera</h2></div>
-        <div class="bread-value"><strong id="breadQty">70 g</strong><span>già inclusi nei totali</span></div>
-        <p class="micro">Puoi distribuirla tra i pasti. È conteggiata automaticamente nei macro e nella lista della spesa.</p>
+      <section class="today-card mockup-summary" aria-label="Riepilogo nutrizionale">
+        <div class="summary-heading">
+          <span class="today-label" id="dayTitle">OGGI</span>
+        </div>
+        <div class="summary-top">
+          <div class="summary-copy">
+            <div class="summary-kicker">Calorie consumate</div>
+            <div class="today-kcal">
+              <strong id="kcalTotal">—</strong>
+              <span>/ <b id="kcalTarget">1450</b> kcal</span>
+            </div>
+            <div class="progress-track hero-track"><div id="kcalProgress" class="progress-fill"></div></div>
+            <div class="summary-foot">
+              <span id="statusText">Seleziona le alternative</span>
+              <button type="button" id="detailBtn" class="outline-btn">Dettaglio ›</button>
+            </div>
+          </div>
+          <div class="summary-phoenix" aria-hidden="true"></div>
+        </div>
+
+        <div class="macro-grid macro-grid-4" id="macroBreakdown">
+          <div class="macro-item protein">
+            <span>Proteine</span>
+            <strong><span id="proteinTotal">—</span> g</strong>
+            <small><span id="proteinPct">—</span> · target 21%</small>
+          </div>
+          <div class="macro-item carbs">
+            <span>Carboidrati</span>
+            <strong><span id="carbTotal">—</span> g</strong>
+            <small><span id="carbPct">—</span> · target 50%</small>
+          </div>
+          <div class="macro-item fats">
+            <span>Grassi</span>
+            <strong><span id="fatTotal">—</span> g</strong>
+            <small><span id="fatPct">—</span> · target 29%</small>
+          </div>
+          <div class="macro-item fibers">
+            <span>Fibre</span>
+            <strong><span id="fiberTotal">—</span> g</strong>
+            <small>/ <span id="fiberTarget">30</span> g</small>
+          </div>
+        </div>
+      </section>
+
+      <section class="bread-card">
+        <div class="bread-icon" aria-hidden="true">🍞</div>
+        <div class="bread-copy">
+          <h3>Pane di oggi</h3>
+          <p>Quantità consigliata: <strong id="breadQty">70 g</strong></p>
+        </div>
+        <button type="button" id="breadModifyBtn" class="outline-btn">Modifica ✎</button>
       </section>
 
       <section id="weekendNotice" class="weekend-notice" hidden></section>
-      <section class="meal-list" id="mealList" aria-live="polite"></section>
+
+      <section class="meals-section">
+        <div class="meals-section-head">
+          <div>
+            <span class="section-mini">I TUOI PASTI</span>
+          </div>
+          <button type="button" id="toggleDayView" class="text-btn">Vedi giornata ›</button>
+        </div>
+        <section class="meal-list" id="mealList" aria-live="polite"></section>
+      </section>
 
       <section class="season-panel">
         <div class="section-head">
-          <div><p class="eyebrow">ROTAZIONE VEGETALE</p><h2>Verdure di stagione</h2></div>
+          <div><h2>Verdure di stagione</h2></div>
           <div class="segmented" role="group" aria-label="Mese stagionalità">
             <button type="button" class="seg-btn active" data-season="settembre">Set</button>
             <button type="button" class="seg-btn" data-season="ottobre">Ott</button>
           </div>
         </div>
         <div id="vegChips" class="veg-chips"></div>
-        <p class="micro">Usa 250–300 g nei pasti principali, scegliendo le verdure che tolleri meglio. Se l'intestino è sensibile, preferiscile cotte.</p>
+        <p class="micro">Scegli tra quelle di stagione e usa la quantità prevista nel pasto.</p>
       </section>
-
-      <section class="rules-panel">
-        <p class="eyebrow">STRUTTURA DEL PIANO</p>
-        <div class="rules-grid">
-          <div><span>🌾</span><strong>50% carbo</strong><small>quota principale entro il pranzo</small></div>
-          <div><span>🥩</span><strong>21% proteine</strong><small>≈76 g sul target 1450</small></div>
-          <div><span>🫒</span><strong>29% grassi</strong><small>olio EVO come quota importante</small></div>
-          <div><span>🍕</span><strong>Sabato</strong><small>pizza 210 g come nel piano originale</small></div>
-        </div>
-      </section>
-
-      <section class="actions">
+<section class="actions">
         <button id="resetDay" type="button" class="secondary-btn">Azzera il giorno</button>
         <button id="saveDay" type="button" class="primary-btn">Salva scelte</button>
       </section>
@@ -125,7 +147,7 @@
       </section>
 
       <section class="measure-panel">
-        <div class="section-head"><div><p class="eyebrow">NUOVA RILEVAZIONE</p><h2>Peso e misure</h2></div></div>
+        <div class="section-head"><div><h2>Peso e misure</h2></div></div>
         <form id="measureForm" class="measure-form">
           <label class="field wide"><span>Data</span><input id="measureDate" name="measureDate" type="date" required /></label>
           <label class="field"><span>Peso (kg)</span><input name="weight" type="number" inputmode="decimal" step="0.1" min="20" max="400" placeholder="es. 68,5" /></label>
@@ -143,7 +165,7 @@
 
       <section class="chart-panel">
         <div class="section-head chart-head">
-          <div><p class="eyebrow">ANDAMENTO</p><h2 id="chartCaption">Andamento peso (kg)</h2></div>
+          <div><h2 id="chartCaption">Andamento peso (kg)</h2></div>
           <label class="metric-picker"><span class="sr-only">Metrica grafico</span><select id="metricSelect">
             <option value="weight">Peso</option><option value="waist">Vita</option><option value="abdomen">Addome</option><option value="hips">Fianchi</option><option value="thigh">Coscia</option><option value="arm">Braccio</option><option value="chest">Torace</option>
           </select></label>
@@ -152,7 +174,7 @@
       </section>
 
       <section class="history-panel">
-        <div class="section-head"><div><p class="eyebrow">STORICO</p><h2>Rilevazioni</h2></div></div>
+        <div class="section-head"><div><h2>Rilevazioni</h2></div></div>
         <p id="historyEmpty" class="empty-state">Nessuna rilevazione ancora salvata.</p>
         <div class="history-scroll">
           <table class="history-table">
@@ -166,9 +188,8 @@
     <section id="shoppingPanel" class="tab-panel" hidden>
       <section class="shopping-hero">
         <div>
-          <p class="eyebrow">LISTA DELLA SPESA DINAMICA</p>
-          <h2>La spesa segue le tue scelte</h2>
-          <p class="micro">La spesa usa la settimana selezionata e le alternative A/B/C scelte in ciascun giorno.</p>
+          <h2>Lista della spesa</h2>
+          <p class="micro">Si aggiorna automaticamente in base alle alternative scelte nella settimana selezionata.</p>
         </div>
         <div class="shopping-count"><strong id="shoppingCoverage">0/33</strong><span id="shoppingWeekLabel">settimana selezionata</span></div>
       </section>
@@ -196,7 +217,6 @@
       <section id="shoppingList" class="shopping-list" aria-live="polite"></section>
 
       <section class="season-panel">
-        <p class="eyebrow">VERDURE</p>
         <h2>Come usare “verdure stagionali miste”</h2>
         <div class="veg-chips">
           <span class="veg-chip">Zucchine</span><span class="veg-chip">Melanzane</span><span class="veg-chip">Peperoni</span>
@@ -206,18 +226,12 @@
         <p class="micro">La quantità totale viene calcolata dai pasti selezionati; puoi distribuirla tra queste verdure in base a stagione e tolleranza.</p>
       </section>
     </section>
-
-    <details class="info-panel">
-      <summary>Come installarla su Android</summary>
-      <ol>
-        <li>Pubblica questa cartella su un hosting HTTPS, per esempio GitHub Pages o Netlify.</li>
-        <li>Apri il link con Chrome su Android.</li>
-        <li>Menu ⋮ → <strong>Installa app</strong> oppure <strong>Aggiungi a schermata Home</strong>.</li>
-        <li>Le scelte dei pasti, la lista della spesa e le misure vengono salvate localmente sul dispositivo.</li>
-      </ol>
-    </details>
-
-    <footer>Dashboard personale · ciclo 4 settimane La Brocca · target 1450 kcal · stime alimentari orientative · dati locali.</footer>
+<nav class="section-nav" aria-label="Sezioni dell'app">
+      <button type="button" class="tab-btn active" data-tab="meals"><span class="tab-ico">🍽️</span><span class="tab-label">Pasti</span></button>
+      <button type="button" class="tab-btn" data-tab="shopping"><span class="tab-ico">🧺</span><span class="tab-label">Lista spesa</span></button>
+      <button type="button" class="tab-btn" data-tab="progress"><span class="tab-ico">📊</span><span class="tab-label">Progressi</span></button>
+    </nav>
+<footer>Dashboard alimentare · target 1450 kcal · dati salvati sul dispositivo</footer>
   </main>
   <script src="app.js"></script>
 </body>
