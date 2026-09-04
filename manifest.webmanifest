@@ -1,0 +1,25 @@
+{
+  "name": "Dashboard alimentare · 4 settimane",
+  "short_name": "Piano 4 settimane",
+  "description": "Dashboard La Brocca 1450 kcal con programmazione reale su 4 settimane, spesa dinamica e progressi.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f6f2ec",
+  "theme_color": "#7a6f63",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
