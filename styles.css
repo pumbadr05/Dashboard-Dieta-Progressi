@@ -1680,3 +1680,287 @@ footer{
     min-height:38px !important;
   }
 }
+
+
+/* ===== V12 · profiles + progress photos ===== */
+.profile-switcher{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  margin-top:10px;
+}
+.profile-switch-label{
+  color:#9a8e7a;
+  font-size:9px;
+  font-weight:800;
+  letter-spacing:.12em;
+}
+.profile-switch-buttons{
+  display:inline-flex;
+  gap:3px;
+  padding:3px;
+  border:1px solid #ead8ca;
+  border-radius:999px;
+  background:#fffaf5;
+}
+.profile-btn{
+  min-height:30px;
+  padding:6px 12px;
+  border:0;
+  border-radius:999px;
+  background:transparent;
+  color:#7c7568;
+  font-size:12px;
+  line-height:1;
+}
+.profile-btn.active{
+  background:#d97d60;
+  color:#fff;
+  box-shadow:0 2px 7px rgba(184,102,78,.15);
+}
+
+.progress-profile-banner{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:12px;
+  margin-top:12px;
+  padding:14px 16px;
+  border:1px solid #ead9ca;
+  border-radius:20px;
+  background:linear-gradient(135deg,#fff8f2,#f6f6ef);
+}
+.progress-profile-banner > div{
+  display:grid;
+  gap:2px;
+}
+.progress-profile-banner strong{
+  font-family:Georgia,"Times New Roman",serif;
+  color:#552f3b;
+  font-size:24px;
+  font-weight:500;
+}
+.profile-separation-note{
+  color:#849071;
+  font-size:11px;
+  text-align:right;
+}
+
+.photo-panel{
+  margin-top:12px;
+  padding:18px;
+  background:#fffdfa;
+  border:1px solid #ead9ca;
+  border-radius:24px;
+  box-shadow:0 8px 24px rgba(121,86,66,.05);
+}
+.photo-head{
+  align-items:flex-start;
+}
+.photo-head h2{
+  margin:3px 0 4px;
+}
+.photo-upload-btn{
+  flex:0 0 auto;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-height:40px;
+  padding:9px 14px;
+  border:1px solid #e1ae95;
+  border-radius:999px;
+  background:#fff7f1;
+  color:#b56754;
+  font-size:13px;
+  cursor:pointer;
+}
+.photo-upload-meta{
+  display:grid;
+  grid-template-columns:170px 1fr;
+  gap:10px;
+  margin:14px 0 12px;
+}
+.photo-upload-meta .field input{
+  width:100%;
+}
+.photo-empty{
+  min-height:150px;
+  display:grid;
+  place-items:center;
+  align-content:center;
+  gap:5px;
+  text-align:center;
+  border:1px dashed #e6d7ca;
+  border-radius:18px;
+  background:#fcf8f3;
+  color:#8a806f;
+}
+.photo-empty[hidden]{
+  display:none !important;
+}
+.photo-empty-icon{
+  width:42px;
+  height:42px;
+  border-radius:50%;
+  display:grid;
+  place-items:center;
+  background:#f6e5db;
+  color:#ca765e;
+  font-size:20px;
+}
+.photo-empty strong{
+  color:#5a3d43;
+  font-size:14px;
+}
+.photo-empty small{
+  max-width:290px;
+  font-size:11.5px;
+  line-height:1.35;
+}
+
+.photo-gallery{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:12px;
+}
+.progress-photo-card{
+  min-width:0;
+  overflow:hidden;
+  border:1px solid #ead9ca;
+  border-radius:18px;
+  background:#fffaf6;
+}
+.photo-open{
+  display:block;
+  width:100%;
+  aspect-ratio:4 / 5;
+  padding:0;
+  border:0;
+  background:#f2ebe4;
+  overflow:hidden;
+}
+.photo-open img{
+  display:block;
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+.photo-card-meta{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:8px;
+  padding:10px 11px;
+}
+.photo-card-meta > div{
+  min-width:0;
+  display:grid;
+  gap:2px;
+}
+.photo-card-meta strong{
+  color:#552f3b;
+  font-size:12px;
+}
+.photo-card-meta small{
+  color:#85796e;
+  font-size:10.5px;
+  line-height:1.25;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.photo-delete{
+  flex:0 0 auto;
+  width:28px;
+  height:28px;
+  border:1px solid #ead7ca;
+  border-radius:50%;
+  background:#fff;
+  color:#a7645b;
+  font-size:17px;
+  line-height:1;
+}
+
+.photo-lightbox[hidden]{
+  display:none !important;
+}
+.photo-lightbox{
+  position:fixed;
+  inset:0;
+  z-index:2000;
+  padding:52px 18px 24px;
+  display:grid;
+  place-items:center;
+  align-content:center;
+  background:rgba(44,33,34,.88);
+  backdrop-filter:blur(8px);
+}
+.photo-lightbox img{
+  max-width:min(92vw,720px);
+  max-height:76vh;
+  border-radius:20px;
+  box-shadow:0 18px 60px rgba(0,0,0,.3);
+}
+.photo-lightbox-close{
+  position:absolute;
+  top:18px;
+  right:18px;
+  width:42px;
+  height:42px;
+  border:1px solid rgba(255,255,255,.25);
+  border-radius:50%;
+  background:rgba(255,255,255,.12);
+  color:#fff;
+  font-size:28px;
+}
+.photo-lightbox-meta{
+  display:grid;
+  gap:3px;
+  margin-top:12px;
+  text-align:center;
+  color:#fff;
+}
+.photo-lightbox-meta strong{
+  font-size:14px;
+}
+.photo-lightbox-meta span{
+  color:#e8ddd6;
+  font-size:12px;
+}
+body.lightbox-open{
+  overflow:hidden;
+}
+
+@media(max-width:620px){
+  .profile-switcher{
+    align-items:flex-start;
+    flex-direction:column;
+    gap:5px;
+  }
+  .profile-switch-buttons{
+    width:auto;
+  }
+  .progress-profile-banner{
+    align-items:flex-start;
+  }
+  .photo-head{
+    display:grid;
+    gap:10px;
+  }
+  .photo-upload-btn{
+    justify-self:start;
+  }
+  .photo-upload-meta{
+    grid-template-columns:1fr;
+  }
+  .photo-gallery{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+}
+
+/* ===== V13 · giornata con cena vegetale ===== */
+.weekend-notice{color:#5e654f}
+
+/* ===== V14 · restart 1350 kcal ===== */
+.today-kcal strong{color:#c86f58}
+.weekend-notice{line-height:1.5}

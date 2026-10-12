@@ -1,7 +1,7 @@
 {
   "name": "Dashboard alimentare",
   "short_name": "Dashboard alimentare",
-  "description": "Dashboard alimentare con calendario settimanale, lista della spesa dinamica e progressi.",
+  "description": "Dashboard alimentare: nuovo ciclo dal 12 ottobre 2026 con tetto di 1350 kcal, profili, progressi e foto.",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",

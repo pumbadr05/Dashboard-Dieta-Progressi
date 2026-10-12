@@ -17,7 +17,14 @@
       <div>
           <div class="brand-row"><img src="icons/icon-192.png" alt="" class="brand-icon">
         <h1>Dashboard alimentare</h1>
-        <p class="subtitle">Il tuo percorso per rinascere come una fenice, ogni giorno.</p></div>
+        <p class="subtitle">Il tuo percorso per rinascere come una fenice, ogni giorno.</p>
+        <div class="profile-switcher" aria-label="Seleziona profilo">
+          <span class="profile-switch-label">PROFILO</span>
+          <div class="profile-switch-buttons" role="group" aria-label="Profilo attivo">
+            <button type="button" class="profile-btn active" data-profile="federica">Federica</button>
+            <button type="button" class="profile-btn" data-profile="davide">Davide</button>
+          </div>
+        </div></div>
       </div>
     </header>
 <section id="mealsPanel" class="tab-panel">
@@ -26,7 +33,7 @@
           <button type="button" id="prevWeek" class="calendar-nav" aria-label="Settimana precedente">‹</button>
           <div>
             <span class="calendar-eyebrow">SETTIMANA</span>
-            <strong id="calendarRange">7–13 settembre</strong>
+            <strong id="calendarRange">12–18 ottobre</strong>
           </div>
           <button type="button" id="nextWeek" class="calendar-nav" aria-label="Settimana successiva">›</button>
         </div>
@@ -34,17 +41,17 @@
         <div id="calendarDays" class="calendar-days"></div>
 
         <div class="calendar-meta">
-          <strong id="cycleLabel">Settimana 1 di 4 · 7–13 settembre</strong>
-          <span id="cycleNote">Dal 5 ottobre il ciclo riparte automaticamente dalla Settimana 1.</span>
+          <strong id="cycleLabel">Settimana 1 di 4 · 12–18 ottobre</strong>
+          <span id="cycleNote">Dal 9 novembre il ciclo riparte automaticamente dalla Settimana 1.</span>
         </div>
 
         <div class="logic-controls" aria-hidden="true">
           <label for="weekSelect">Settimana</label>
           <select id="weekSelect">
-            <option value="1">1 · 7–13 settembre</option>
-            <option value="2">2 · 14–20 settembre</option>
-            <option value="3">3 · 21–27 settembre</option>
-            <option value="4">4 · 28 settembre–4 ottobre</option>
+            <option value="1">1 · 12–18 ottobre</option>
+            <option value="2">2 · 19–25 ottobre</option>
+            <option value="3">3 · 26 ottobre–1 novembre</option>
+            <option value="4">4 · 2–8 novembre</option>
           </select>
 
           <label for="daySelect">Giorno</label>
@@ -64,7 +71,7 @@
             <div class="summary-kicker">Calorie consumate</div>
             <div class="today-kcal">
               <strong id="kcalTotal">—</strong>
-              <span>/ <b id="kcalTarget">1450</b> kcal</span>
+              <span>/ <b id="kcalTarget">1350</b> kcal</span>
             </div>
             <div class="progress-track hero-track"><div id="kcalProgress" class="progress-fill"></div></div>
             <div class="summary-foot">
@@ -79,17 +86,17 @@
           <div class="macro-item protein">
             <span>Proteine</span>
             <strong><span id="proteinTotal">—</span> g</strong>
-            <small><span id="proteinPct">—</span> · target 21%</small>
+            <small><span id="proteinPct">—</span> · target <span id="proteinTargetPct">21%</span></small>
           </div>
           <div class="macro-item carbs">
             <span>Carboidrati</span>
             <strong><span id="carbTotal">—</span> g</strong>
-            <small><span id="carbPct">—</span> · target 50%</small>
+            <small><span id="carbPct">—</span> · target <span id="carbTargetPct">50%</span></small>
           </div>
           <div class="macro-item fats">
             <span>Grassi</span>
             <strong><span id="fatTotal">—</span> g</strong>
-            <small><span id="fatPct">—</span> · target 29%</small>
+            <small><span id="fatPct">—</span> · target <span id="fatTargetPct">29%</span></small>
           </div>
           <div class="macro-item fibers">
             <span>Fibre</span>
@@ -124,8 +131,8 @@
         <div class="section-head">
           <div><h2>Verdure di stagione</h2></div>
           <div class="segmented" role="group" aria-label="Mese stagionalità">
-            <button type="button" class="seg-btn active" data-season="settembre">Set</button>
-            <button type="button" class="seg-btn" data-season="ottobre">Ott</button>
+            <button type="button" class="seg-btn active" data-season="ottobre">Ott</button>
+            <button type="button" class="seg-btn" data-season="novembre">Nov</button>
           </div>
         </div>
         <div id="vegChips" class="veg-chips"></div>
@@ -139,6 +146,14 @@
     </section>
 
     <section id="progressPanel" class="tab-panel" hidden>
+      <section class="progress-profile-banner">
+        <div>
+          <span class="section-mini">PROGRESSI DI</span>
+          <strong id="progressProfileName">Federica</strong>
+        </div>
+        <span class="profile-separation-note">Storico personale separato</span>
+      </section>
+
       <section class="progress-summary" aria-label="Riepilogo progressi corporei">
         <article class="progress-stat featured"><span>Ultimo peso</span><strong id="latestWeight">—</strong></article>
         <article class="progress-stat"><span>Variazione</span><strong id="weightDelta">—</strong><small>dal primo dato</small></article>
@@ -161,6 +176,37 @@
         </form>
         <p id="measureStatus" class="save-message left" role="status" aria-live="polite"></p>
         <p class="micro">Puoi lasciare vuoti i campi che non vuoi misurare. Per confronti utili, prendi le circonferenze sempre nello stesso punto e in condizioni simili.</p>
+      </section>
+
+      <section class="photo-panel">
+        <div class="section-head photo-head">
+          <div>
+            <span class="section-mini">FOTO PROGRESSI</span>
+            <h2>Il tuo percorso nel tempo</h2>
+            <p class="micro">Le foto restano salvate su questo dispositivo e sono separate per profilo.</p>
+          </div>
+          <label class="photo-upload-btn" for="progressPhotoInput">＋ Aggiungi foto</label>
+          <input id="progressPhotoInput" type="file" accept="image/*" multiple hidden />
+        </div>
+
+        <div class="photo-upload-meta">
+          <label class="field photo-date-field">
+            <span>Data delle foto</span>
+            <input id="progressPhotoDate" type="date" />
+          </label>
+          <label class="field photo-note-field">
+            <span>Nota opzionale</span>
+            <input id="progressPhotoNote" type="text" maxlength="80" placeholder="es. Fine settimana 2" />
+          </label>
+        </div>
+
+        <p id="photoStatus" class="save-message left" role="status" aria-live="polite"></p>
+        <div id="photoEmpty" class="photo-empty">
+          <span class="photo-empty-icon">✦</span>
+          <strong>Nessuna foto ancora</strong>
+          <small>Aggiungi le prime foto per confrontare visivamente i progressi.</small>
+        </div>
+        <div id="photoGallery" class="photo-gallery" aria-live="polite"></div>
       </section>
 
       <section class="chart-panel">
@@ -196,13 +242,13 @@
 
       <section class="shopping-config">
         <label class="field">
-          <span>Pasto libero della domenica</span>
+          <span>Pasto flessibile della domenica</span>
           <select id="freeMealSelect">
             <option value="lunch">Pranzo</option>
             <option value="dinner">Cena</option>
           </select>
         </label>
-        <p class="micro">Il sabato sera viene conteggiata automaticamente una pizza margherita da 210 g al posto della cena standard. La domenica viene escluso dalla spesa il pasto libero scelto qui.</p>
+        <p class="micro">Il sabato sera viene conteggiata automaticamente una pizza margherita da 200 g. La domenica il pasto selezionato è flessibile, ma per rispettare il tetto giornaliero deve restare entro circa 420 kcal.</p>
       </section>
 
       <section id="shoppingIncomplete" class="shopping-incomplete" hidden>
@@ -226,12 +272,21 @@
         <p class="micro">La quantità totale viene calcolata dai pasti selezionati; puoi distribuirla tra queste verdure in base a stagione e tolleranza.</p>
       </section>
     </section>
+    <div id="photoLightbox" class="photo-lightbox" hidden>
+      <button type="button" id="photoLightboxClose" class="photo-lightbox-close" aria-label="Chiudi">×</button>
+      <img id="photoLightboxImage" alt="Foto progresso ingrandita" />
+      <div class="photo-lightbox-meta">
+        <strong id="photoLightboxDate"></strong>
+        <span id="photoLightboxNote"></span>
+      </div>
+    </div>
+
 <nav class="section-nav" aria-label="Sezioni dell'app">
       <button type="button" class="tab-btn active" data-tab="meals"><span class="tab-ico">🍽️</span><span class="tab-label">Pasti</span></button>
       <button type="button" class="tab-btn" data-tab="shopping"><span class="tab-ico">🧺</span><span class="tab-label">Lista spesa</span></button>
       <button type="button" class="tab-btn" data-tab="progress"><span class="tab-ico">📊</span><span class="tab-label">Progressi</span></button>
     </nav>
-<footer>Dashboard alimentare · target 1450 kcal · dati salvati sul dispositivo</footer>
+<footer>Dashboard alimentare · target 1350 kcal · dati salvati sul dispositivo</footer>
   </main>
   <script src="app.js"></script>
 </body>

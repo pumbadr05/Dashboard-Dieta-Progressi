@@ -1,9 +1,9 @@
 (() => {
-  const TARGET = 1450;
-  const CYCLE_START = '2026-09-07';
-  const TARGET_MACRO = {p:76,c:181,f:47};
+  const TARGET = 1350;
+  const CYCLE_START = '2026-10-12';
+  const TARGET_MACRO = {p:100,c:160,f:45};
   const FIBER_TARGET = 30;
-  const breadOverridePrefix='breadOverrideDashboard1450';
+  const breadOverridePrefix='breadOverrideDashboard1350_20261012';
 
   const I=(name,qty,unit,category)=>({name,qty,unit,category});
   const K=(p,c,f)=>Math.round(p*4+c*4+f*9);
@@ -16,35 +16,35 @@
   const dayIndex={lun:0,mar:1,mer:2,gio:3,ven:4,sab:5,dom:6};
 
   const weekMeta={
-    1:{range:'7–13 settembre',theme:'Programmazione settimanale'},
-    2:{range:'14–20 settembre',theme:'Programmazione settimanale'},
-    3:{range:'21–27 settembre',theme:'Programmazione settimanale'},
-    4:{range:'28 settembre–4 ottobre',theme:'Programmazione settimanale'}
+    1:{range:'12–18 ottobre',theme:'Programmazione settimanale'},
+    2:{range:'19–25 ottobre',theme:'Programmazione settimanale'},
+    3:{range:'26 ottobre–1 novembre',theme:'Programmazione settimanale'},
+    4:{range:'2–8 novembre',theme:'Programmazione settimanale'}
   };
 
   const weekDates={
-    1:{lun:{n:7,m:'set'},mar:{n:8,m:'set'},mer:{n:9,m:'set'},gio:{n:10,m:'set'},ven:{n:11,m:'set'},sab:{n:12,m:'set'},dom:{n:13,m:'set'}},
-    2:{lun:{n:14,m:'set'},mar:{n:15,m:'set'},mer:{n:16,m:'set'},gio:{n:17,m:'set'},ven:{n:18,m:'set'},sab:{n:19,m:'set'},dom:{n:20,m:'set'}},
-    3:{lun:{n:21,m:'set'},mar:{n:22,m:'set'},mer:{n:23,m:'set'},gio:{n:24,m:'set'},ven:{n:25,m:'set'},sab:{n:26,m:'set'},dom:{n:27,m:'set'}},
-    4:{lun:{n:28,m:'set'},mar:{n:29,m:'set'},mer:{n:30,m:'set'},gio:{n:1,m:'ott'},ven:{n:2,m:'ott'},sab:{n:3,m:'ott'},dom:{n:4,m:'ott'}}
+    1:{lun:{n:12,m:'ott'},mar:{n:13,m:'ott'},mer:{n:14,m:'ott'},gio:{n:15,m:'ott'},ven:{n:16,m:'ott'},sab:{n:17,m:'ott'},dom:{n:18,m:'ott'}},
+    2:{lun:{n:19,m:'ott'},mar:{n:20,m:'ott'},mer:{n:21,m:'ott'},gio:{n:22,m:'ott'},ven:{n:23,m:'ott'},sab:{n:24,m:'ott'},dom:{n:25,m:'ott'}},
+    3:{lun:{n:26,m:'ott'},mar:{n:27,m:'ott'},mer:{n:28,m:'ott'},gio:{n:29,m:'ott'},ven:{n:30,m:'ott'},sab:{n:31,m:'ott'},dom:{n:1,m:'nov'}},
+    4:{lun:{n:2,m:'nov'},mar:{n:3,m:'nov'},mer:{n:4,m:'nov'},gio:{n:5,m:'nov'},ven:{n:6,m:'nov'},sab:{n:7,m:'nov'},dom:{n:8,m:'nov'}}
   };
 
   // Quota pane giornaliera.
   const bread={
-    1:{lun:90,mar:80,mer:110,gio:80,ven:90,sab:30,dom:70},
-    2:{lun:100,mar:80,mer:90,gio:80,ven:110,sab:30,dom:70},
-    3:{lun:90,mar:80,mer:100,gio:70,ven:100,sab:30,dom:70},
-    4:{lun:80,mar:80,mer:90,gio:70,ven:90,sab:30,dom:70}
+    1:{lun:0,mar:40,mer:30,gio:45,ven:25,sab:0,dom:30},
+    2:{lun:0,mar:25,mer:45,gio:45,ven:35,sab:0,dom:30},
+    3:{lun:0,mar:40,mer:30,gio:45,ven:35,sab:0,dom:30},
+    4:{lun:0,mar:25,mer:45,gio:45,ven:35,sab:0,dom:30}
   };
   const breadMacro=q=>({p:0.085*q,c:0.49*q,f:0.025*q,kcal:K(.085*q,.49*q,.025*q)});
 
   const breadOverrideKey=(w,d)=>`${breadOverridePrefix}_w${w}_${d}`;
-  const getBreadQty=(w,d)=>{const v=Number(localStorage.getItem(breadOverrideKey(w,d)));return Number.isFinite(v)&&v>0?v:bread[w][d];};
-  const setBreadQty=(w,d,v)=>{if(v==null||v===''){localStorage.removeItem(breadOverrideKey(w,d));return;}const n=Number(v);if(Number.isFinite(n)&&n>0)localStorage.setItem(breadOverrideKey(w,d),String(Math.round(n)));};
+  const getBreadQty=(w,d)=>{const raw=localStorage.getItem(breadOverrideKey(w,d));if(raw!==null){const v=Number(raw);if(Number.isFinite(v)&&v>=0)return v;}return bread[w][d];};
+  const setBreadQty=(w,d,v)=>{if(v==null||v===''){localStorage.removeItem(breadOverrideKey(w,d));return;}const n=Number(v);if(Number.isFinite(n)&&n>=0)localStorage.setItem(breadOverrideKey(w,d),String(Math.round(n)));};
 
   const dayFullDate=(w,d)=>{
     const dt=weekDates[w][d], label=days.find(x=>x.id===d)?.label || '';
-    const month=dt.m==='set'?'settembre':'ottobre';
+    const month=dt.m==='ott'?'ottobre':'novembre';
     return `${label.toUpperCase()}, ${dt.n} ${month}`;
   };
 
@@ -66,6 +66,9 @@
       if(name.includes('banana')) return q*0.026;
       if(name.includes('cilieg')) return q*0.016;
       return q*0.02;
+    }
+    if(cat==='Legumi'){
+      return unit==='g' ? q*0.07 : q*7;
     }
     if(cat==='Cereali e pane'){
       if(name.includes('avena') || name.includes('muesli')) return q*0.09;
@@ -143,6 +146,36 @@
   const berries=()=>['Fragole','Fragole 180–200 g',[I('Fragole',190,'g','Frutta')]];
   const cherries=()=>['Ciliegie','Ciliegie 120 g',[I('Ciliegie',120,'g','Frutta')]];
   const apple=()=>['Mela','1 mela piccola',[I('Mela',1,'pz','Frutta')]];
+
+  // Una giornata a settimana ribilanciata per includere una cena completamente vegetale.
+  // Target indicativo: ~1450 kcal, ~100-105 g proteine, ~155-160 g carboidrati, ~44-45 g grassi.
+  const plantDinnerDay={
+    breakfast:[
+      O('Yogurt greco SL, avena e kiwi','Yogurt greco 0% SL 200 g · avena 20 g · kiwi 100 g',23,32,3,[I('Yogurt greco 0% SL',200,'g','Latticini SL'),I('Avena',20,'g','Cereali e pane'),I('Kiwi',100,'g','Frutta')],true),
+      O('Skyr SL, muesli e frutti rossi','Skyr SL 200 g · muesli 25 g · frutti rossi 100 g',24,31,3,[I('Skyr SL',200,'g','Latticini SL'),I('Muesli',25,'g','Cereali e pane'),I('Frutti di bosco',100,'g','Frutta')]),
+      O('Yogurt greco SL, segale e miele','Yogurt greco 0% SL 200 g · pane di segale 30 g · miele 8 g',23,33,2.5,[I('Yogurt greco 0% SL',200,'g','Latticini SL'),I('Pane di segale',30,'g','Cereali e pane'),I('Miele',8,'g','Condimenti')])
+    ],
+    snack:[
+      O('Pera','Pera 100 g',0.5,15,0.2,[I('Pera',100,'g','Frutta')],true),
+      O('Kiwi','Kiwi 130 g',1,15,0.5,[I('Kiwi',130,'g','Frutta')]),
+      O('Arancia','Arancia 150 g',1,16,0.2,[I('Arancia',150,'g','Frutta')])
+    ],
+    lunch:[
+      O('Pollo, riso e verdure','Petto di pollo 130 g · riso basmati 40 g a crudo · verdure 250 g · EVO 12 g',45,44,18,[I('Petto di pollo',130,'g','Carne, pesce e uova'),I('Riso basmati',40,'g','Cereali e pane'),I('Verdure stagionali miste',250,'g','Verdura'),I('Olio EVO',12,'g','Condimenti')],true),
+      O('Tacchino, farro e verdure','Tacchino 140 g · farro 45 g a crudo · verdure 250 g · EVO 12 g',46,43,17,[I('Tacchino',140,'g','Carne, pesce e uova'),I('Farro',45,'g','Cereali e pane'),I('Verdure stagionali miste',250,'g','Verdura'),I('Olio EVO',12,'g','Condimenti')]),
+      O('Vitello, orzo e verdure','Vitello magro 140 g · orzo 45 g a crudo · verdure 250 g · EVO 11 g',42,44,17,[I('Vitello magro',140,'g','Carne, pesce e uova'),I('Orzo',45,'g','Cereali e pane'),I('Verdure stagionali miste',250,'g','Verdura'),I('Olio EVO',11,'g','Condimenti')])
+    ],
+    afternoon:[
+      O('Skyr SL','Skyr SL 125 g',14,7,0.3,[I('Skyr SL',125,'g','Latticini SL')],true),
+      O('Yogurt greco SL','Yogurt greco 0% SL 150 g',15,7,1,[I('Yogurt greco 0% SL',150,'g','Latticini SL')]),
+      O('Fiocchi di latte SL','Fiocchi di latte SL 120 g',15,5,3,[I('Fiocchi di latte SL',120,'g','Latticini SL')])
+    ],
+    dinner:[
+      O('Lenticchie e verdure','Lenticchie cotte e sgocciolate 200 g · verdure 250 g · EVO 11 g',21,52,12,[I('Lenticchie cotte',200,'g','Legumi'),I('Verdure stagionali miste',250,'g','Verdura'),I('Olio EVO',11,'g','Condimenti')],true),
+      O('Ceci e verdure','Ceci cotti e sgocciolati 170 g · verdure 250 g · EVO 8 g',19,52,13,[I('Ceci cotti',170,'g','Legumi'),I('Verdure stagionali miste',250,'g','Verdura'),I('Olio EVO',8,'g','Condimenti')]),
+      O('Fagioli cannellini e verdure','Fagioli cannellini cotti 220 g · verdure 250 g · EVO 11 g',20,50,12,[I('Fagioli cannellini cotti',220,'g','Legumi'),I('Verdure stagionali miste',250,'g','Verdura'),I('Olio EVO',11,'g','Condimenti')])
+    ]
+  };
 
   const optSet=(macroKey, arr)=>arr.map((x,i)=>O(x.name,x.detail,...macro(macroKey),x.ingredients,i===0));
 
@@ -378,7 +411,8 @@
     ])
   };
 
-  const pizza=O('Pizza Margherita','Pizza Margherita al piatto 210 g',...macro('pizza'),[I('Pizza Margherita',210,'g','Pasti speciali')],true);
+  const pizza=O('Pizza Margherita','Pizza Margherita al piatto 200 g',18,76,16,[I('Pizza Margherita',200,'g','Pasti speciali')],true);
+  const flexibleMeal1350=O('Pasto flessibile','Budget massimo 420 kcal · scegli liberamente restando entro questo limite',20,45,18,[I('Pasto flessibile',1,'pz','Pasti speciali')],true);
 
   // Colazione e frutta seguono la rotazione originale L/T/Y/T/L/Y.
   const breakfastKey={lun:'tea',mar:'latte',mer:'yogurt',gio:'tea',ven:'latte',sab:'yogurt',dom:'yogurt'};
@@ -410,8 +444,8 @@
   sundayMain[2]=sundayMain[1]; sundayMain[3]=sundayMain[1]; sundayMain[4]=sundayMain[1];
 
   const season={
-    settembre:['Zucchine','Melanzane','Peperoni','Pomodori','Fagiolini','Bietole','Spinaci','Rucola','Radicchio','Zucca'],
-    ottobre:['Finocchi','Zucca','Broccoli','Cavolfiore','Radicchio','Carote','Bietole','Spinaci','Rucola']
+    ottobre:['Finocchi','Zucca','Broccoli','Cavolfiore','Radicchio','Carote','Bietole','Spinaci','Rucola'],
+    novembre:['Finocchi','Zucca','Broccoli','Cavolfiore','Cavolo nero','Radicchio','Carote','Bietole','Spinaci']
   };
   const metricMeta={
     weight:{label:'Peso',unit:'kg'},waist:{label:'Vita',unit:'cm'},abdomen:{label:'Addome',unit:'cm'},
@@ -422,11 +456,16 @@
   const daySelect=document.getElementById('daySelect');
   const list=document.getElementById('mealList');
   const weekend=document.getElementById('weekendNotice');
-  const progressKey='bodyProgress_v1';
-  const purchasedKey=w=>`shoppingPurchased_dashboard1450_w${w}`;
+  const legacyProgressKey='bodyProgress_v1';
+  const activeProfileKey='dashboardActiveProfile_v1';
+  const profiles={federica:{name:'Federica'},davide:{name:'Davide'}};
+  let activeProfile=localStorage.getItem(activeProfileKey)||'federica';
+  if(!profiles[activeProfile]) activeProfile='federica';
+  const progressKey=()=>`bodyProgress_v2_${activeProfile}`;
+  const purchasedKey=w=>`shoppingPurchased_dashboard1350_20261012_w${w}`;
   const legacyPurchasedKey=w=>`shoppingPurchased_labrocca1450_w${w}`;
   const freeMealKey='shoppingSundayFree_v1';
-  const storeKey=(w,d)=>`pianoDashboard1450_w${w}_${d}`;
+  const storeKey=(w,d)=>`pianoDashboard1350_20261012_w${w}_${d}`;
   const legacyStoreKey=(w,d)=>`pianoLabrocca1450_w${w}_${d}`;
 
   const currentWeek=()=>Number(weekSelect.value);
@@ -450,6 +489,7 @@
   function keyFor(w,d){return `w${w}${d}`;}
 
   function mealOptions(w,d,meal){
+    if(d==='lun' && plantDinnerDay[meal]) return plantDinnerDay[meal];
     if(meal==='breakfast') return B[breakfastKey[d]];
     if(meal==='snack') {
       const f=fruitRotation[w][d]; return fruitOpts(f[0],f[1],f[2]);
@@ -458,7 +498,7 @@
       const f=afternoonRotation[w][d]; return fruit2Opts(f[0],f[1],f[2]);
     }
     if(d==='sab'&&meal==='dinner') return [pizza];
-    if(d==='dom'&&(meal==='lunch'||meal==='dinner')) return sundayMain[w][meal];
+    if(d==='dom'&&(meal==='lunch'||meal==='dinner')){if(meal===getFreeMeal())return [flexibleMeal1350];return sundayMain[w][meal];}
     if(meal==='lunch') return lunch[keyFor(w,d)] || sundayMain[w].lunch;
     if(meal==='dinner') return dinner[keyFor(w,d)] || sundayMain[w].dinner;
     return [];
@@ -467,9 +507,7 @@
   function getStoredSelections(w,d){
     try{
       const current=localStorage.getItem(storeKey(w,d));
-      const legacy=localStorage.getItem(legacyStoreKey(w,d));
-      const parsed=JSON.parse(current||legacy||'{}')||{};
-      if(!current&&legacy)localStorage.setItem(storeKey(w,d),JSON.stringify(parsed));
+      const parsed=JSON.parse(current||'{}')||{};
       return parsed;
     }catch(e){return {}}
   }
@@ -519,7 +557,7 @@
     document.getElementById('cycleLabel').textContent=`Settimana ${w} di 4 · ${weekMeta[w].range}`;
     const cycle=currentCycleNumber();
     document.getElementById('cycleNote').textContent=cycle===1
-      ? 'Dal 5 ottobre il ciclo riparte automaticamente dalla Settimana 1.'
+      ? 'Dal 9 novembre il ciclo riparte automaticamente dalla Settimana 1.'
       : `Ciclo ${cycle}: dopo la Settimana 4 si torna alla 1.`;
     document.getElementById('shoppingWeekLabel').textContent=`settimana ${w}`;
     renderCalendar();
@@ -598,14 +636,16 @@
   }
 
   function updateWeekend(){
-
     const d=currentDay();
-    if(d==='sab'){
+    if(d==='lun'){
       weekend.hidden=false;
-      weekend.innerHTML='🍕 <strong>Sabato:</strong> pizza Margherita 210 g fissa e quota pane ridotta a 30 g, come previsto dalla programmazione.';
+      weekend.innerHTML='🌱 <strong>Lunedì:</strong> giornata ribilanciata con <strong>cena vegetale a base di legumi</strong>. Non è previsto pane aggiuntivo: i legumi coprono già parte della quota di carboidrati. Il resto della giornata resta più proteico per mantenere il totale entro 1350 kcal.';
+    }else if(d==='sab'){
+      weekend.hidden=false;
+      weekend.innerHTML='🍕 <strong>Sabato:</strong> pizza Margherita 200 g fissa e nessuna quota di pane aggiuntiva, come previsto dalla programmazione.';
     }else if(d==='dom'){
       weekend.hidden=false;
-      weekend.innerHTML='🍽️ <strong>Domenica:</strong> è previsto <strong>un solo pasto libero</strong>, scelto nella sezione Spesa.';
+      weekend.innerHTML='🍽️ <strong>Domenica:</strong> è previsto <strong>un pasto flessibile con budget massimo di circa 420 kcal</strong>, scelto nella sezione Spesa.';
     }else weekend.hidden=true;
   }
 
@@ -634,10 +674,14 @@
 
     const ek=p*4+c*4+f*9;
     const cp=ek?Math.round(c*4/ek*100):0,pp=ek?Math.round(p*4/ek*100):0,fp=ek?100-cp-pp:0;
+    const macroTarget={c:44,p:29,f:27};
     document.getElementById('carbPct').textContent=count?`${cp}%`:'—';
     document.getElementById('proteinPct').textContent=count?`${pp}%`:'—';
     document.getElementById('fatPct').textContent=count?`${fp}%`:'—';
-    const dist=Math.abs(cp-50)+Math.abs(pp-21)+Math.abs(fp-29);
+    document.getElementById('carbTargetPct').textContent=`${macroTarget.c}%`;
+    document.getElementById('proteinTargetPct').textContent=`${macroTarget.p}%`;
+    document.getElementById('fatTargetPct').textContent=`${macroTarget.f}%`;
+    const dist=Math.abs(cp-macroTarget.c)+Math.abs(pp-macroTarget.p)+Math.abs(fp-macroTarget.f);
     const ratio = document.getElementById('ratioStatus');
     if(ratio) ratio.textContent=count===required?(dist<=6?'coerente':'vicino al target'):'parziale';
 
@@ -664,7 +708,7 @@ localStorage.setItem(storeKey(currentWeek(),currentDay()),JSON.stringify(getSele
     document.querySelectorAll('.tab-btn').forEach(b=>b.classList.toggle('active',b.dataset.tab===name));
     document.querySelectorAll('.tab-panel').forEach(p=>p.hidden=p.id!==`${name}Panel`);
     if(name==='shopping')renderShopping();
-    if(name==='progress')renderProgress();
+    if(name==='progress'){renderProgress();renderPhotos();}
   }
 
   // SHOPPING
@@ -707,7 +751,7 @@ localStorage.setItem(storeKey(currentWeek(),currentDay()),JSON.stringify(getSele
     const inc=document.getElementById('shoppingIncomplete');
     inc.hidden=data.missing.length===0;
     document.getElementById('shoppingIncompleteText').textContent=data.missing.length?`Mancano ${data.missing.length} scelte nella Settimana ${w}. La lista mostra comunque tutto ciò che hai già programmato.`:'';
-    const order=['Carne, pesce e uova','Latticini SL','Cereali e pane','Verdura','Frutta','Condimenti','Bevande','Pasti speciali'],groups={};
+    const order=['Carne, pesce e uova','Legumi','Latticini SL','Cereali e pane','Verdura','Frutta','Condimenti','Bevande','Pasti speciali'],groups={};
     data.items.forEach(x=>(groups[x.category]||(groups[x.category]=[])).push(x));
     box.innerHTML=order.filter(c=>groups[c]?.length).map(cat=>`<section class="shopping-category"><div class="shopping-category-head"><h3>${cat}</h3><span>${groups[cat].length} voci</span></div><div class="shopping-items">${
       groups[cat].sort((a,b)=>a.name.localeCompare(b.name,'it')).map((x,i)=>{
@@ -719,21 +763,222 @@ localStorage.setItem(storeKey(currentWeek(),currentDay()),JSON.stringify(getSele
   }
 
   // PROGRESS
-  function getProgress(){try{const v=JSON.parse(localStorage.getItem(progressKey)||'[]');return Array.isArray(v)?v:[]}catch(e){return []}}
-  function setProgress(v){localStorage.setItem(progressKey,JSON.stringify(v));}
+  function migrateLegacyProgress(){
+    if(activeProfile!=='federica') return;
+    const newKey=progressKey();
+    if(localStorage.getItem(newKey)) return;
+    const legacy=localStorage.getItem(legacyProgressKey);
+    if(legacy) localStorage.setItem(newKey,legacy);
+  }
+  function getProgress(){
+    migrateLegacyProgress();
+    try{const v=JSON.parse(localStorage.getItem(progressKey())||'[]');return Array.isArray(v)?v:[]}catch(e){return []}
+  }
+  function setProgress(v){localStorage.setItem(progressKey(),JSON.stringify(v));}
   function n(v){if(v==='')return null;const x=Number(v);return Number.isFinite(x)&&x>0&&x<1000?Math.round(x*10)/10:null;}
   function todayISO(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
   function fmtDate(iso){if(!iso)return '—';const [y,m,d]=iso.split('-');return `${d}/${m}/${y}`;}
   function saveMeasurement(e){e.preventDefault();const f=e.currentTarget,r={id:Date.now(),date:f.measureDate.value};Object.keys(metricMeta).forEach(k=>r[k]=n(f.elements[k].value));const s=document.getElementById('measureStatus');if(!r.date){s.textContent='Inserisci la data.';return;}if(!Object.keys(metricMeta).some(k=>r[k]!=null)){s.textContent='Inserisci almeno un valore.';return;}let a=getProgress();const i=a.findIndex(x=>x.date===r.date);if(i>=0){r.id=a[i].id;a[i]=r}else a.push(r);a.sort((x,y)=>x.date.localeCompare(y.date));setProgress(a);s.textContent=i>=0?'Misurazione aggiornata.':'Misurazione salvata.';f.reset();f.measureDate.value=todayISO();renderProgress();}
   function deleteMeasurement(id){setProgress(getProgress().filter(x=>x.id!==id));renderProgress();}
   function delta(a,b,u){if(a==null||b==null)return '—';const d=Math.round((b-a)*10)/10;return `${d>0?'+':''}${d} ${u}`;}
-  function renderProgress(){const a=getProgress(),last=a[a.length-1],first=a[0];document.getElementById('latestWeight').textContent=last?.weight!=null?`${last.weight} kg`:'—';document.getElementById('weightDelta').textContent=first&&last?delta(first.weight,last.weight,'kg'):'—';document.getElementById('latestMeasureDate').textContent=last?fmtDate(last.date):'—';document.getElementById('measureCount').textContent=a.length;renderHistory(a);renderChart(a,document.getElementById('metricSelect').value);}
+  function renderProfileUI(){
+    document.querySelectorAll('.profile-btn').forEach(btn=>btn.classList.toggle('active',btn.dataset.profile===activeProfile));
+    const name=profiles[activeProfile]?.name||'Federica';
+    const title=document.getElementById('progressProfileName');
+    if(title) title.textContent=name;
+  }
+  function switchProfile(profile){
+    if(!profiles[profile]||profile===activeProfile)return;
+    activeProfile=profile;
+    localStorage.setItem(activeProfileKey,profile);
+    renderProfileUI();
+    const form=document.getElementById('measureForm');
+    if(form){form.reset();form.measureDate.value=todayISO();}
+    const photoDate=document.getElementById('progressPhotoDate');
+    if(photoDate) photoDate.value=todayISO();
+    const note=document.getElementById('progressPhotoNote');
+    if(note) note.value='';
+    renderProgress();
+    renderPhotos();
+  }
+  function renderProgress(){
+    renderProfileUI();
+    const a=getProgress(),last=a[a.length-1],first=a[0];
+    document.getElementById('latestWeight').textContent=last?.weight!=null?`${last.weight} kg`:'—';
+    document.getElementById('weightDelta').textContent=first&&last?delta(first.weight,last.weight,'kg'):'—';
+    document.getElementById('latestMeasureDate').textContent=last?fmtDate(last.date):'—';
+    document.getElementById('measureCount').textContent=a.length;
+    renderHistory(a);
+    renderChart(a,document.getElementById('metricSelect').value);
+  }
   function renderHistory(a){const tb=document.getElementById('historyBody'),em=document.getElementById('historyEmpty');if(!a.length){tb.innerHTML='';em.hidden=false;return;}em.hidden=true;tb.innerHTML=[...a].reverse().map(x=>`<tr><td>${fmtDate(x.date)}</td><td>${x.weight??'—'}</td><td>${x.waist??'—'}</td><td>${x.abdomen??'—'}</td><td>${x.hips??'—'}</td><td>${x.thigh??'—'}</td><td>${x.arm??'—'}</td><td>${x.chest??'—'}</td><td><button type="button" class="delete-row" data-id="${x.id}">×</button></td></tr>`).join('');tb.querySelectorAll('.delete-row').forEach(b=>b.addEventListener('click',()=>deleteMeasurement(Number(b.dataset.id))));}
   function renderChart(a,m){const svg=document.getElementById('progressChart'),meta=metricMeta[m],pts=a.filter(x=>x[m]!=null).map(x=>({date:x.date,value:x[m]}));document.getElementById('chartCaption').textContent=`Andamento ${meta.label.toLowerCase()} (${meta.unit})`;if(pts.length<2){svg.innerHTML='<text x="50%" y="50%" text-anchor="middle" class="chart-empty">Servono almeno 2 rilevazioni</text>';return;}const W=640,H=230,p={l:52,r:18,t:18,b:36};let lo=Math.min(...pts.map(x=>x.value)),hi=Math.max(...pts.map(x=>x.value));if(lo===hi){lo--;hi++;}const ex=(hi-lo)*.12;lo-=ex;hi+=ex;const X=i=>p.l+i/(pts.length-1)*(W-p.l-p.r),Y=v=>p.t+(hi-v)/(hi-lo)*(H-p.t-p.b);const grid=[0,.25,.5,.75,1].map(t=>{const v=hi-(hi-lo)*t,y=p.t+t*(H-p.t-p.b);return `<line x1="${p.l}" y1="${y}" x2="${W-p.r}" y2="${y}" class="chart-grid"/><text x="${p.l-8}" y="${y+4}" text-anchor="end" class="chart-label">${v.toFixed(1)}</text>`}).join('');const line=pts.map((x,i)=>`${X(i)},${Y(x.value)}`).join(' '),dots=pts.map((x,i)=>`<circle cx="${X(i)}" cy="${Y(x.value)}" r="4.5" class="chart-dot"><title>${fmtDate(x.date)}: ${x.value} ${meta.unit}</title></circle>`).join('');svg.innerHTML=`${grid}<polyline points="${line}" class="chart-line"/>${dots}`;}
 
+
+  // PROGRESS PHOTOS — IndexedDB, separate per profile.
+  const PHOTO_DB_NAME='dashboardProgressPhotos_v1';
+  const PHOTO_STORE='photos';
+
+  function openPhotoDB(){
+    return new Promise((resolve,reject)=>{
+      const req=indexedDB.open(PHOTO_DB_NAME,1);
+      req.onupgradeneeded=()=>{
+        const db=req.result;
+        if(!db.objectStoreNames.contains(PHOTO_STORE)){
+          const store=db.createObjectStore(PHOTO_STORE,{keyPath:'id',autoIncrement:true});
+          store.createIndex('profile','profile',{unique:false});
+          store.createIndex('date','date',{unique:false});
+        }
+      };
+      req.onsuccess=()=>resolve(req.result);
+      req.onerror=()=>reject(req.error);
+    });
+  }
+
+  async function dbAddPhoto(record){
+    const db=await openPhotoDB();
+    return new Promise((resolve,reject)=>{
+      const tx=db.transaction(PHOTO_STORE,'readwrite');
+      const req=tx.objectStore(PHOTO_STORE).add(record);
+      req.onsuccess=()=>resolve(req.result);
+      req.onerror=()=>reject(req.error);
+      tx.oncomplete=()=>db.close();
+    });
+  }
+
+  async function dbGetPhotos(profile){
+    const db=await openPhotoDB();
+    return new Promise((resolve,reject)=>{
+      const tx=db.transaction(PHOTO_STORE,'readonly');
+      const idx=tx.objectStore(PHOTO_STORE).index('profile');
+      const req=idx.getAll(profile);
+      req.onsuccess=()=>resolve((req.result||[]).sort((a,b)=>(b.date||'').localeCompare(a.date||'')||b.id-a.id));
+      req.onerror=()=>reject(req.error);
+      tx.oncomplete=()=>db.close();
+    });
+  }
+
+  async function dbDeletePhoto(id){
+    const db=await openPhotoDB();
+    return new Promise((resolve,reject)=>{
+      const tx=db.transaction(PHOTO_STORE,'readwrite');
+      const req=tx.objectStore(PHOTO_STORE).delete(id);
+      req.onsuccess=()=>resolve();
+      req.onerror=()=>reject(req.error);
+      tx.oncomplete=()=>db.close();
+    });
+  }
+
+  function compressImage(file,maxSide=1200,quality=.78){
+    return new Promise((resolve,reject)=>{
+      const reader=new FileReader();
+      reader.onload=()=>{
+        const img=new Image();
+        img.onload=()=>{
+          const ratio=Math.min(1,maxSide/Math.max(img.width,img.height));
+          const w=Math.max(1,Math.round(img.width*ratio));
+          const h=Math.max(1,Math.round(img.height*ratio));
+          const canvas=document.createElement('canvas');
+          canvas.width=w;canvas.height=h;
+          const ctx=canvas.getContext('2d');
+          ctx.drawImage(img,0,0,w,h);
+          resolve(canvas.toDataURL('image/jpeg',quality));
+        };
+        img.onerror=()=>reject(new Error('Immagine non leggibile'));
+        img.src=reader.result;
+      };
+      reader.onerror=()=>reject(reader.error);
+      reader.readAsDataURL(file);
+    });
+  }
+
+  async function handlePhotoUpload(files){
+    const list=[...files].filter(f=>f.type.startsWith('image/'));
+    if(!list.length)return;
+    const status=document.getElementById('photoStatus');
+    const date=document.getElementById('progressPhotoDate')?.value||todayISO();
+    const note=(document.getElementById('progressPhotoNote')?.value||'').trim();
+    status.textContent=list.length===1?'Salvataggio foto…':`Salvataggio di ${list.length} foto…`;
+    let saved=0;
+    try{
+      for(const file of list){
+        const dataUrl=await compressImage(file);
+        await dbAddPhoto({
+          profile:activeProfile,
+          date,
+          note,
+          dataUrl,
+          createdAt:Date.now()
+        });
+        saved++;
+      }
+      status.textContent=saved===1?'Foto salvata.':`${saved} foto salvate.`;
+      document.getElementById('progressPhotoInput').value='';
+      await renderPhotos();
+      setTimeout(()=>{if(status.textContent.includes('salvat'))status.textContent='';},2200);
+    }catch(err){
+      status.textContent='Non sono riuscito a salvare la foto. Riprova con un file più leggero.';
+    }
+  }
+
+  async function renderPhotos(){
+    const gallery=document.getElementById('photoGallery');
+    const empty=document.getElementById('photoEmpty');
+    if(!gallery||!empty)return;
+    try{
+      const photos=await dbGetPhotos(activeProfile);
+      empty.hidden=photos.length>0;
+      gallery.innerHTML=photos.map(p=>`
+        <article class="progress-photo-card" data-id="${p.id}">
+          <button type="button" class="photo-open" data-id="${p.id}" aria-label="Apri foto del ${fmtDate(p.date)}">
+            <img src="${p.dataUrl}" alt="Foto progresso ${profiles[activeProfile].name} del ${fmtDate(p.date)}" loading="lazy" />
+          </button>
+          <div class="photo-card-meta">
+            <div><strong>${fmtDate(p.date)}</strong>${p.note?`<small>${escapeHtml(p.note)}</small>`:''}</div>
+            <button type="button" class="photo-delete" data-id="${p.id}" aria-label="Elimina foto">×</button>
+          </div>
+        </article>`).join('');
+
+      gallery.querySelectorAll('.photo-open').forEach(btn=>btn.addEventListener('click',()=>{
+        const p=photos.find(x=>x.id===Number(btn.dataset.id));
+        if(p)openPhotoLightbox(p);
+      }));
+      gallery.querySelectorAll('.photo-delete').forEach(btn=>btn.addEventListener('click',async()=>{
+        if(!confirm('Eliminare questa foto dai progressi?'))return;
+        await dbDeletePhoto(Number(btn.dataset.id));
+        renderPhotos();
+      }));
+    }catch(err){
+      gallery.innerHTML='<p class="micro">Archivio foto non disponibile in questa anteprima.</p>';
+      empty.hidden=true;
+    }
+  }
+
+  function escapeHtml(s){
+    return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
+  }
+
+  function openPhotoLightbox(p){
+    const box=document.getElementById('photoLightbox');
+    document.getElementById('photoLightboxImage').src=p.dataUrl;
+    document.getElementById('photoLightboxDate').textContent=fmtDate(p.date);
+    document.getElementById('photoLightboxNote').textContent=p.note||'';
+    box.hidden=false;
+    document.body.classList.add('lightbox-open');
+  }
+
+  function closePhotoLightbox(){
+    const box=document.getElementById('photoLightbox');
+    box.hidden=true;
+    document.getElementById('photoLightboxImage').src='';
+    document.body.classList.remove('lightbox-open');
+  }
+
   // INIT
   weekSelect.value=String(autoWeekFromToday());
-  renderVeg('settembre');
+  renderProfileUI();
+  document.querySelectorAll('.profile-btn').forEach(btn=>btn.addEventListener('click',()=>switchProfile(btn.dataset.profile)));
+  renderVeg('ottobre');
   renderMeals();
   document.querySelectorAll('.tab-btn').forEach(b=>b.addEventListener('click',()=>setTab(b.dataset.tab)));
   weekSelect.addEventListener('change',()=>{renderMeals();renderShopping();});
@@ -746,6 +991,11 @@ localStorage.setItem(storeKey(currentWeek(),currentDay()),JSON.stringify(getSele
   const fm=document.getElementById('freeMealSelect');fm.value=getFreeMeal();fm.addEventListener('change',()=>{localStorage.setItem(freeMealKey,fm.value);renderShopping();});
   document.getElementById('clearPurchased').addEventListener('click',()=>{localStorage.removeItem(purchasedKey(currentWeek()));renderShopping();});
   const form=document.getElementById('measureForm');form.measureDate.value=todayISO();form.addEventListener('submit',saveMeasurement);
+  const photoDate=document.getElementById('progressPhotoDate'); if(photoDate) photoDate.value=todayISO();
+  const photoInput=document.getElementById('progressPhotoInput'); if(photoInput) photoInput.addEventListener('change',()=>handlePhotoUpload(photoInput.files));
+  document.getElementById('photoLightboxClose')?.addEventListener('click',closePhotoLightbox);
+  document.getElementById('photoLightbox')?.addEventListener('click',e=>{if(e.target.id==='photoLightbox')closePhotoLightbox();});
+  document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!document.getElementById('photoLightbox')?.hidden)closePhotoLightbox();});
   document.getElementById('metricSelect').addEventListener('change',renderProgress);
 
   const breadBtn=document.getElementById('breadModifyBtn');
@@ -776,6 +1026,6 @@ localStorage.setItem(storeKey(currentWeek(),currentDay()),JSON.stringify(getSele
     toggleDayView.textContent=allOpen?'Vedi giornata ›':'Chiudi giornata ‹';
   });
 
-  renderProgress();renderShopping();
+  renderProgress();renderPhotos();renderShopping();
   if('serviceWorker'in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('sw.js').catch(()=>{});
 })();
