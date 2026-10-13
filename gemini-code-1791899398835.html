@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard Alimentare</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="manifest" href="manifest.webmanifest">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Header -->
+    <header class="welcome-header">
+      <h1 class="user-greeting">👋 Ciao!</h1>
+      <div class="streak-badge">🔥 5 Giorni</div>
+    </header>
+
+    <!-- Motivation Banner -->
+    <div class="motivation-card">
+      <span>🌟</span>
+      <span>Stai andando alla grande! Mantieni il ritmo.</span>
+    </div>
+
+    <!-- Main Progress Card -->
+    <section class="calorie-card">
+      <div class="calorie-target-title">🎯 CALORIE GIORNALIERE</div>
+      <div class="calorie-value" id="calorie-text">1.450 / 2.000 kcal</div>
+      <div class="progress-bar-bg">
+        <div class="progress-bar-fill" id="calorie-progress" style="width: 72.5%;"></div>
+      </div>
+      <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 8px;">Ancora <strong>550 kcal</strong> per raggiungere il tuo obiettivo!</p>
+    </section>
+
+    <!-- Macronutrients Chips -->
+    <section class="macros-grid">
+      <div class="macro-chip carb">
+        <div class="macro-name">🥑 CARBOIDRATI</div>
+        <div class="macro-value">160g</div>
+      </div>
+      <div class="macro-chip prot">
+        <div class="macro-name">🍗 PROTEINE</div>
+        <div class="macro-value">95g</div>
+      </div>
+      <div class="macro-chip fat">
+        <div class="macro-name">🧀 GRASSI</div>
+        <div class="macro-value">45g</div>
+      </div>
+    </section>
+
+    <!-- Meals Diario -->
+    <section>
+      <h2 class="section-title">🍏 Il tuo diario oggi</h2>
+      
+      <div class="meal-card">
+        <div>
+          <strong style="display: block; font-size: 1rem;">☕ Colazione</strong>
+          <span style="color: var(--text-muted); font-size: 0.85rem;">Yogurt e fiocchi d'avena</span>
+        </div>
+        <span style="font-weight: 700; color: var(--primary-color);">350 kcal</span>
+      </div>
+
+      <div class="meal-card">
+        <div>
+          <strong style="display: block; font-size: 1rem;">☀️ Pranzo</strong>
+          <span style="color: var(--text-muted); font-size: 0.85rem;">Riso basmati e pollo</span>
+        </div>
+        <span style="font-weight: 700; color: var(--primary-color);">620 kcal</span>
+      </div>
+
+      <button class="btn-add-meal" id="add-meal-btn">➕ Registra un pasto</button>
+    </section>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
