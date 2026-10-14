@@ -709,6 +709,7 @@ localStorage.setItem(storeKey(currentWeek(),currentDay()),JSON.stringify(getSele
     document.querySelectorAll('.tab-panel').forEach(p=>p.hidden=p.id!==`${name}Panel`);
     if(name==='shopping')renderShopping();
     if(name==='progress'){renderProgress();renderPhotos();}
+    if(name==='training')renderTraining();
   }
 
   // SHOPPING
@@ -800,6 +801,7 @@ localStorage.setItem(storeKey(currentWeek(),currentDay()),JSON.stringify(getSele
     if(note) note.value='';
     renderProgress();
     renderPhotos();
+    if(typeof renderTraining==='function')renderTraining();
   }
   function renderProgress(){
     renderProfileUI();
@@ -974,6 +976,221 @@ localStorage.setItem(storeKey(currentWeek(),currentDay()),JSON.stringify(getSele
     document.body.classList.remove('lightbox-open');
   }
 
+
+  // ===== ALLENAMENTO — Blocco 2 (19 ottobre – 29 novembre 2026), scheda di Federica =====
+  const TRAIN_START='2026-10-19';
+  const TRAIN_WEEKS=6;
+  const trainDayIds=['lun','mar','mer','gio','ven','sab','dom'];
+  const trainDayNames={lun:'Lunedì',mar:'Martedì',mer:'Mercoledì',gio:'Giovedì',ven:'Venerdì',sab:'Sabato',dom:'Domenica'};
+  const trainDayLabels={lun:'FB A',mar:'Punch',mer:'Pilates',gio:'Libero',ven:'FB B',sab:'Cardio',dom:'Riposo'};
+  const trainKind={lun:'A',mar:'P',ven:'B'};
+  const trainOptional={mer:true,sab:true};
+  const monthNames=['gennaio','febbraio','marzo','aprile','maggio','giugno','luglio','agosto','settembre','ottobre','novembre','dicembre'];
+  const trainWeekInfo=[
+    {focus:'Rientro e tecnica',note:'Esercizi nuovi: parti leggera, RPE 6–7, impara la tecnica.'},
+    {focus:'Più ripetizioni',note:'+1 rep per serie o +2,5% di carico.'},
+    {focus:'Più carico',note:'Sali di carico solo se le serie restano pulite e riparti dal basso del range.'},
+    {focus:'Consolidamento',note:'Top del range con il nuovo carico.'},
+    {focus:'Picco',note:'Glutei a RPE 8, quadricipiti a RPE 7, parte alta a RPE 6–7, senza cedimento.'},
+    {focus:'Scarico',note:'Meno 1 serie per esercizio, carichi della sett. 3, RPE 6.'}
+  ];
+  const trainFinisherMin={A:[10,10,10,10,10,5],B:[10,10,15,15,15,10]};
+  const TRAIN_WARM='7–8 min cyclette/ellittica RPE 3–4 + mobilità caviglie/anche + 2 serie progressive leggere sul primo esercizio.';
+  const X=(name,s,r,rpe,rec,note,late)=>({name,s,r,rpe,rec,note:note||'',late:late||''});
+  const WORKOUTS={
+    A:{title:'Full Body A',sub:'Glutei, catena posteriore e core; parte alta contenuta',dur:'70–80 min',rpe:'7–8',
+      ex:[
+        X('Goblet squat a box (o hack squat)',2,'10–12','7','90 s','Carico moderato, discesa lenta; quadricipiti al minimo utile'),
+        X('RDL monopodalico con manubrio',3,'8–10/lato','7','90–120 s','Appoggia una mano, schiena neutra','8'),
+        X("Abduzioni all'anca al cavo (o alla macchina)",2,'12–15/lato','8','45–60 s','Glutei medi, movimento lento senza slancio'),
+        X('Trazioni assistite (o lat machine presa neutra)',3,'8–10','6–7','75–90 s','Se non riesci, lat machine'),
+        X('Panca piana manubri, presa neutra',2,'8–10','6–7','60–75 s','In superset con il rematore'),
+        X('Rematore a un braccio con manubrio',2,'10/lato','6–7','60–75 s',"Petto fermo, gomito verso l'anca"),
+        X('Face pull ai cavi',2,'12–15','6–7','45–60 s','Spalle posteriori e postura; in superset con il Pallof press'),
+        X('Pallof press (anti-rotazione)',3,'10/lato','6–7','45–60 s','Bacino fermo, pausa di 2 s con braccia tese'),
+        X('Side plank (dalle ginocchia o piena)',2,'20–30 s/lato','6–7','45 s',"Bacino allineato, spalla lontana dall'orecchio")
+      ],
+      finisher:w=>`${trainFinisherMin.A[w-1]} min cyclette/ellittica a bassa resistenza, RPE 3–4. Leggero: il giorno dopo c'è il Punch.`,
+      after:'3–5 min di defaticamento molto facile + stretching dolce 20–30 s (polpacci, femorali, glutei, flessori anca, pettorali/dorsali) + 5–10 min a gambe sollevate. Nessun dolore, niente stretching statico lungo prima dei pesi.'},
+    B:{title:'Full Body B',sub:'Glutei, catena posteriore e core; nessun cedimento',dur:'70–80 min',rpe:'7–8',
+      ex:[
+        X('Hip thrust bilaterale con pausa 1–2 s (monopodalico quando sei pronta)',3,'10–12','7','90–120 s','Carico moderato, bacino neutro in alto','8'),
+        X('Affondo indietro con manubri',2,'8–10/lato','7','75–90 s','Tieni un appoggio vicino se serve'),
+        X('Kickback glutei al cavo (o alla macchina)',2,'12–15/lato','8','45–60 s','Senza inarcare la zona lombare'),
+        X('Distensioni ai cavi in piedi (cable press)',2,'10–12','6–7','60–75 s','In superset con il rematore'),
+        X('Rematore T-bar con petto appoggiato (o low row)',2,'8–10','6–7','60–75 s',''),
+        X('Reverse hyper su panca (o superman alternato a terra)',2,'10–12','7–8','60–75 s','Pausa 1 s in alto, senza inarcare la zona lombare'),
+        X('Arnold press seduta (o landmine press)',2,'8–10','6–7','60–75 s','Carico leggero-moderato'),
+        X('Suitcase carry (camminata con un manubrio)',3,'20–25 m/lato','6–7','45–60 s','Busto dritto, non inclinarti'),
+        X('Bird dog con pausa di 2 s',2,'8–10/lato','6–7','45 s','')
+      ],
+      finisher:w=>`${trainFinisherMin.B[w-1]} min a ritmo costante RPE 4–5 su cyclette o ellittica a bassa resistenza, in ambiente fresco. Mai prima dei pesi, niente HIIT.`,
+      after:'3–5 min di defaticamento molto facile + stretching dolce 20–30 s + 5–10 min a gambe sollevate.'}
+  };
+  const trainFreeDays={
+    mer:{title:'Pilates (facoltativo)',text:'Solo se hai tempo ed energie: 45–60 min, RPE 3–5. Utile per mobilità e benessere, ma brucia poche calorie e non sostituisce la forza.'},
+    gio:{title:'Giorno libero',text:'Se ne hai voglia, 10–15 min di mobilità caviglie/anche o una camminata facile, poi gambe sollevate.'},
+    sab:{title:'Cardio (facoltativo)',text:'Nuoto o acquagym, oppure cyclette/ellittica a bassa resistenza, a ritmo costante RPE 4–5, 30–40 min. È la prima cosa da aggiungere se il peso si ferma per 3 settimane. Se lo salti, non si recupera.'},
+    dom:{title:'Riposo',text:'Giornata di recupero completo.'}
+  };
+  const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  const trainKey=()=>`trainingLog_v1_${activeProfile}`;
+  function getTrainLog(){try{const v=JSON.parse(localStorage.getItem(trainKey())||'{}');return v&&typeof v==='object'?v:{}}catch(e){return {}}}
+  function setTrainLog(v){localStorage.setItem(trainKey(),JSON.stringify(v));}
+  function trainEntry(log,w,day){const k=`w${w}_${day}`;if(!log[k])log[k]={done:false,ex:{}};if(!log[k].ex)log[k].ex={};return log[k];}
+  function trainDate(w,day){const d=new Date(TRAIN_START+'T12:00:00');d.setDate(d.getDate()+(w-1)*7+trainDayIds.indexOf(day));return d;}
+  function trainRange(w){const a=trainDate(w,'lun'),b=trainDate(w,'dom');return a.getMonth()===b.getMonth()?`${a.getDate()}–${b.getDate()} ${monthNames[a.getMonth()]}`:`${a.getDate()} ${monthNames[a.getMonth()]}–${b.getDate()} ${monthNames[b.getMonth()]}`;}
+  function trainToday(){const now=new Date();now.setHours(12,0,0,0);const diff=Math.floor((now-new Date(TRAIN_START+'T12:00:00'))/86400000);return {diff,w:Math.min(TRAIN_WEEKS,Math.max(1,Math.floor(diff/7)+1)),day:['dom','lun','mar','mer','gio','ven','sab'][now.getDay()]};}
+  const trainNow=trainToday();
+  let trainWeek=trainNow.w;
+  let trainDay=(trainNow.diff>=0&&trainNow.diff<TRAIN_WEEKS*7)?trainNow.day:'lun';
+  const trainRpe=(ex,w)=>w===1?'6–7':(w===6?'6':((ex.late&&w>=3)?ex.late:ex.rpe));
+  const trainSets=(ex,w)=>w===6?Math.max(1,ex.s-1):ex.s;
+  const trainPrevWeek=w=>w===6?3:w-1;
+
+  function trainStatusNote(){
+    if(trainNow.diff<0){const d=trainDate(1,'lun');return `Il blocco parte lunedì ${d.getDate()} ${monthNames[d.getMonth()]}. Nel frattempo, questa settimana tienila leggera.`;}
+    if(trainNow.diff>=TRAIN_WEEKS*7)return 'Il Blocco 2 è concluso: rivedi i carichi e riparti da una nuova scheda.';
+    return '';
+  }
+
+  function renderTrainWeek(log){
+    const w=trainWeek;
+    const days=trainDayIds.map(id=>{
+      const dt=trainDate(w,id),done=!!(log[`w${w}_${id}`]&&log[`w${w}_${id}`].done);
+      return `<button type="button" class="calendar-day tr-day ${id===trainDay?'active':''} ${done?'tr-done-day':''}" data-tr-day="${id}" aria-pressed="${id===trainDay?'true':'false'}">
+        <span>${id.toUpperCase()}${done?' ✓':''}</span><strong>${dt.getDate()}</strong><small>${trainDayLabels[id]}</small></button>`;
+    }).join('');
+    const info=trainWeekInfo[w-1],status=trainStatusNote();
+    return `<section class="calendar-card tr-week">
+      <div class="calendar-head">
+        <button type="button" class="calendar-nav" data-tr-nav="-1" aria-label="Settimana precedente">‹</button>
+        <div><span class="calendar-eyebrow">SETTIMANA</span><strong>${w} di ${TRAIN_WEEKS} · ${trainRange(w)}</strong></div>
+        <button type="button" class="calendar-nav" data-tr-nav="1" aria-label="Settimana successiva">›</button>
+      </div>
+      <div class="calendar-days">${days}</div>
+      <div class="calendar-meta"><strong>${esc(info.focus)}</strong><span>${esc(info.note)}</span></div>
+      ${status?`<p class="micro tr-status">${esc(status)}</p>`:''}
+    </section>`;
+  }
+
+  function trainHead(day,title,sub,optionalDone,entry){
+    const dt=trainDate(trainWeek,day);
+    const check=(trainKind[day]||optionalDone)?`<label class="tr-done"><input type="checkbox" data-tr-done ${entry.done?'checked':''}><span>${entry.done?'Fatta':'Segna fatta'}</span></label>`:'';
+    return `<div class="tr-head"><div><span class="section-mini">${trainDayNames[day].toUpperCase()} ${dt.getDate()} ${monthNames[dt.getMonth()].toUpperCase()}</span><h2>${esc(title)}</h2>${sub?`<p class="micro">${esc(sub)}</p>`:''}</div>${check}</div>`;
+  }
+
+  function renderTrainWorkout(log,key){
+    const w=trainWeek,day=trainDay,wk=WORKOUTS[key],entry=log[`w${w}_${day}`]||{done:false,ex:{}};
+    const prevEntry=log[`w${trainPrevWeek(w)}_${day}`]||{ex:{}};
+    const exs=wk.ex.map((ex,i)=>{
+      const saved=(entry.ex&&entry.ex[i])||{},prev=(prevEntry.ex&&prevEntry.ex[i]&&prevEntry.ex[i].kg)||'';
+      return `<article class="tr-ex ${saved.ok?'ok':''}" data-ex="${i}">
+        <div class="tr-ex-top"><span class="tr-num">${i+1}</span><div><strong>${esc(ex.name)}</strong>${ex.note?`<small>${esc(ex.note)}</small>`:''}</div></div>
+        <div class="tr-chips"><span>${trainSets(ex,w)} × ${esc(ex.r)}</span><span>RPE ${esc(trainRpe(ex,w))}</span><span>rec. ${esc(ex.rec)}</span></div>
+        <div class="tr-log">
+          <label class="tr-kg"><span>Carico (kg)</span><input type="text" inputmode="decimal" maxlength="6" data-tr-kg value="${esc(saved.kg||'')}" placeholder="${prev?esc(prev):'—'}"></label>
+          <small>${prev?`Sett. ${trainPrevWeek(w)}: ${esc(prev)} kg`:''}</small>
+          <label class="tr-ok"><input type="checkbox" data-tr-ok ${saved.ok?'checked':''}><span>Fatto</span></label>
+        </div></article>`;
+    }).join('');
+    return `<section class="tr-card">
+      ${trainHead(day,wk.title,`${wk.sub} · ${wk.dur} · RPE ${wk.rpe}`,false,entry)}
+      <div class="tr-box"><b>Riscaldamento</b><span>${esc(TRAIN_WARM)}</span></div>
+      <div class="tr-ex-list">${exs}</div>
+      <div class="tr-box"><b>Finisher</b><span>${esc(wk.finisher(w))}</span></div>
+      <div class="tr-box"><b>Dopo i pesi</b><span>${esc(wk.after)}</span></div>
+    </section>`;
+  }
+
+  function renderTrainPunch(log){
+    const w=trainWeek,entry=log[`w${w}_mar`]||{done:false,ex:{}};
+    let extra='';
+    if(w>=4&&w<6)extra=" I picchi possono essere un po' più lunghi, ma niente HIIT aggiuntivo.";
+    if(w===6)extra=' Settimana di scarico: RPE medio 5–6.';
+    return `<section class="tr-card">
+      ${trainHead('mar','Punch','45–55 min · RPE medio 6–7 con picchi 8',false,entry)}
+      <div class="tr-box"><b>Come farlo</b><span>Cardio intenso controllato, niente HIIT aggiuntivo.${esc(extra)}</span></div>
+      <div class="tr-box"><b>Basso impatto</b><span>Niente salti, piedi a terra anche nei picchi (chiedi all'istruttore le alternative). Ambiente fresco e, se prescritta, chiedi se indossare la compressione.</span></div>
+    </section>`;
+  }
+
+  function renderTrainFree(log){
+    const w=trainWeek,day=trainDay,f=trainFreeDays[day],entry=log[`w${w}_${day}`]||{done:false,ex:{}};
+    return `<section class="tr-card">
+      ${trainHead(day,f.title,'',!!trainOptional[day],entry)}
+      <div class="tr-box"><b>${trainOptional[day]?'Facoltativo':'Libero'}</b><span>${esc(f.text)}</span></div>
+    </section>`;
+  }
+
+  const TRAIN_INFO=`
+    <details class="tr-info"><summary>Come progredire</summary>
+      <p><b>Doppia progressione.</b> Parti dal basso del range di ripetizioni. Quando completi tutte le serie al top con RPE uguale o inferiore a quello indicato, la volta dopo aumenta il carico del 2,5–5% e riparti dal basso.</p>
+      <p><b>Niente cedimento.</b> Resta sempre con 1–3 ripetizioni di riserva. Se un carico non sale per una settimana, va bene: stai preservando il muscolo.</p>
+      <p><b>Finisher.</b> Sempre dopo i pesi, mai prima. Se sei a corto di tempo o di energie, accorcia il finisher prima di tagliare le serie dei multiarticolari.</p>
+    </details>
+    <details class="tr-info"><summary>Adattamenti per il lipedema</summary>
+      <p>Non sono indicazioni mediche: conferma le scelte con chi ti segue (angiologo, linfologo, fisioterapista), soprattutto per calze o bendaggi.</p>
+      <ul>
+        <li>Carichi moderati, ripetizioni medio-alte (8–15), RPE 7–8, mai a cedimento.</li>
+        <li>Basso impatto: niente salti nel Punch, niente tapis in salita; finisher su cyclette o ellittica a bassa resistenza.</li>
+        <li>Evita ambienti caldi, bevi spesso e fai le pause in un posto fresco.</li>
+        <li>Dopo la seduta: 5–10 min a gambe sollevate.</li>
+        <li>Sabato facoltativo: nuoto o acquagym al posto della cyclette, se ti è comodo.</li>
+      </ul>
+    </details>
+    <details class="tr-info"><summary>Quando ridurre il volume</summary>
+      <p>Riduci le serie (o parlane con la nutrizionista/il medico) se per più di una settimana noti: stanchezza persistente, sonno peggiorato, freddo costante, capogiri, ciclo irregolare o assente, gonfiore o dolore alle gambe in aumento nei 2 giorni dopo l'allenamento, calo netto della forza, umore basso o pensiero fisso sul cibo.</p>
+      <p>Se un giorno sei molto stanca, tieni la seduta ma riduci di una serie per esercizio.</p>
+    </details>`;
+
+  function renderTraining(){
+    const body=document.getElementById('trainingBody');
+    if(!body)return;
+    const nameEl=document.getElementById('trainingProfileName');
+    if(nameEl)nameEl.textContent=profiles[activeProfile].name;
+    if(activeProfile!=='federica'){
+      body.innerHTML='<section class="tr-card"><p class="empty-state">La scheda di allenamento è quella di Federica. Passa al profilo Federica per vederla e segnare le sedute.</p></section>';
+      return;
+    }
+    const log=getTrainLog(),kind=trainKind[trainDay];
+    const detail=kind==='P'?renderTrainPunch(log):(kind?renderTrainWorkout(log,kind):renderTrainFree(log));
+    body.innerHTML=renderTrainWeek(log)+detail+TRAIN_INFO;
+  }
+
+  (function initTraining(){
+    const body=document.getElementById('trainingBody');
+    if(!body)return;
+    body.addEventListener('click',e=>{
+      const nav=e.target.closest('[data-tr-nav]');
+      if(nav){trainWeek=((trainWeek-1+Number(nav.dataset.trNav)+TRAIN_WEEKS)%TRAIN_WEEKS)+1;renderTraining();return;}
+      const d=e.target.closest('[data-tr-day]');
+      if(d){trainDay=d.dataset.trDay;renderTraining();}
+    });
+    body.addEventListener('input',e=>{
+      const t=e.target;
+      if(!t.matches('[data-tr-kg]'))return;
+      const card=t.closest('.tr-ex');if(!card)return;
+      const log=getTrainLog(),entry=trainEntry(log,trainWeek,trainDay),i=card.dataset.ex;
+      if(!entry.ex[i])entry.ex[i]={};
+      entry.ex[i].kg=t.value.replace(',','.').trim();
+      setTrainLog(log);
+    });
+    body.addEventListener('change',e=>{
+      const t=e.target;
+      if(t.matches('[data-tr-done]')){
+        const log=getTrainLog(),entry=trainEntry(log,trainWeek,trainDay);
+        entry.done=t.checked;setTrainLog(log);renderTraining();
+      }else if(t.matches('[data-tr-ok]')){
+        const card=t.closest('.tr-ex');if(!card)return;
+        const log=getTrainLog(),entry=trainEntry(log,trainWeek,trainDay),i=card.dataset.ex;
+        if(!entry.ex[i])entry.ex[i]={};
+        entry.ex[i].ok=t.checked;setTrainLog(log);
+        card.classList.toggle('ok',t.checked);
+      }
+    });
+  })();
+
   // INIT
   weekSelect.value=String(autoWeekFromToday());
   renderProfileUI();
@@ -1026,6 +1243,6 @@ localStorage.setItem(storeKey(currentWeek(),currentDay()),JSON.stringify(getSele
     toggleDayView.textContent=allOpen?'Vedi giornata ›':'Chiudi giornata ‹';
   });
 
-  renderProgress();renderPhotos();renderShopping();
+  renderProgress();renderPhotos();renderShopping();renderTraining();
   if('serviceWorker'in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('sw.js').catch(()=>{});
 })();

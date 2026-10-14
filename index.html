@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="theme-color" content="#7a6f63" />
-  <meta name="description" content="Dashboard alimentare con programmazione su 4 settimane, lista della spesa dinamica e tracking dei progressi." />
+  <meta name="description" content="Dashboard alimentare con programmazione su 4 settimane, lista della spesa dinamica, scheda di allenamento e tracking dei progressi." />
   <link rel="manifest" href="manifest.webmanifest" />
   <link rel="icon" href="icons/icon-192.png" />
   <link rel="apple-touch-icon" href="icons/icon-192.png" />
@@ -272,6 +272,17 @@
         <p class="micro">La quantità totale viene calcolata dai pasti selezionati; puoi distribuirla tra queste verdure in base a stagione e tolleranza.</p>
       </section>
     </section>
+    <section id="trainingPanel" class="tab-panel" hidden>
+      <section class="progress-profile-banner">
+        <div>
+          <span class="section-mini">ALLENAMENTO DI</span>
+          <strong id="trainingProfileName">Federica</strong>
+        </div>
+        <span class="profile-separation-note">Blocco 2 · 19 ott – 29 nov</span>
+      </section>
+      <div id="trainingBody"></div>
+    </section>
+
     <div id="photoLightbox" class="photo-lightbox" hidden>
       <button type="button" id="photoLightboxClose" class="photo-lightbox-close" aria-label="Chiudi">×</button>
       <img id="photoLightboxImage" alt="Foto progresso ingrandita" />
@@ -284,9 +295,10 @@
 <nav class="section-nav" aria-label="Sezioni dell'app">
       <button type="button" class="tab-btn active" data-tab="meals"><span class="tab-ico">🍽️</span><span class="tab-label">Pasti</span></button>
       <button type="button" class="tab-btn" data-tab="shopping"><span class="tab-ico">🧺</span><span class="tab-label">Lista spesa</span></button>
+      <button type="button" class="tab-btn" data-tab="training"><span class="tab-ico">🏋️</span><span class="tab-label">Allenamento</span></button>
       <button type="button" class="tab-btn" data-tab="progress"><span class="tab-ico">📊</span><span class="tab-label">Progressi</span></button>
     </nav>
-<footer>Dashboard alimentare · target 1350 kcal · dati salvati sul dispositivo</footer>
+<footer>Dashboard alimentare · target 1350 kcal · scheda allenamento Blocco 2 · dati salvati sul dispositivo</footer>
   </main>
   <script src="app.js"></script>
 </body>

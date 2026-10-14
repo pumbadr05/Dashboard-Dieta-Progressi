@@ -1,4 +1,4 @@
-DASHBOARD ALIMENTARE V14 — 1350 KCAL
+DASHBOARD ALIMENTARE V15 — 1350 KCAL + ALLENAMENTO
 
 Nuovo ciclo:
 - partenza: 12 ottobre 2026
@@ -18,3 +18,11 @@ Target:
 
 Il nuovo ciclo usa nuove chiavi per pasti e lista spesa, quindi riparte pulito.
 Progressi, profili Federica/Davide e foto restano conservati.
+
+NOVITÀ V15 — SCHEDA ALLENAMENTO:
+- nuova sezione "Allenamento" nella barra in basso (tra Lista spesa e Progressi)
+- Blocco 2: 19 ottobre – 29 novembre 2026, 6 settimane (indipendente dal ciclo alimentare di 4 settimane)
+- lunedì Full Body A, martedì Punch, venerdì Full Body B; mercoledì, giovedì, sabato e domenica liberi/facoltativi
+- serie, RPE e durata del finisher cambiano in base alla settimana (scarico alla settimana 6)
+- per ogni esercizio puoi segnare il carico usato e se è fatto; il carico della settimana precedente compare come promemoria
+- la scheda è visibile solo nel profilo Federica; i dati di allenamento sono salvati sul dispositivo e separati per profilo
