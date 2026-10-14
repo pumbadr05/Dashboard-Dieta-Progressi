@@ -14,18 +14,20 @@
 <body>
   <main class="app-shell">
     <header class="hero">
-      <div>
-          <div class="brand-row"><img src="icons/icon-192.png" alt="" class="brand-icon">
-        <h1>Dashboard alimentare</h1>
-        <p class="subtitle">Il tuo percorso per rinascere come una fenice, ogni giorno.</p>
+      <div class="hero-row">
+        <img src="icons/icon-192.png" alt="" class="brand-icon">
+        <div class="hero-copy">
+          <span class="hero-eyebrow" id="heroDate">—</span>
+          <h1>Ciao, <i id="heroName">Federica</i></h1>
+        </div>
         <div class="profile-switcher" aria-label="Seleziona profilo">
-          <span class="profile-switch-label">PROFILO</span>
           <div class="profile-switch-buttons" role="group" aria-label="Profilo attivo">
-            <button type="button" class="profile-btn active" data-profile="federica">Federica</button>
-            <button type="button" class="profile-btn" data-profile="davide">Davide</button>
+            <button type="button" class="profile-btn active" data-profile="federica" aria-label="Profilo Federica" title="Federica">F</button>
+            <button type="button" class="profile-btn" data-profile="davide" aria-label="Profilo Davide" title="Davide">D</button>
           </div>
-        </div></div>
+        </div>
       </div>
+      <p class="subtitle">Il tuo percorso per rinascere come una fenice, ogni giorno.</p>
     </header>
 <section id="mealsPanel" class="tab-panel">
       <section class="calendar-card" aria-label="Calendario settimanale">
@@ -66,20 +68,14 @@
         <div class="summary-heading">
           <span class="today-label" id="dayTitle">OGGI</span>
         </div>
-        <div class="summary-top">
-          <div class="summary-copy">
-            <div class="summary-kicker">Calorie consumate</div>
-            <div class="today-kcal">
-              <strong id="kcalTotal">—</strong>
-              <span>/ <b id="kcalTarget">1350</b> kcal</span>
-            </div>
-            <div class="progress-track hero-track"><div id="kcalProgress" class="progress-fill"></div></div>
-            <div class="summary-foot">
-              <span id="statusText">Seleziona le alternative</span>
-              <button type="button" id="detailBtn" class="outline-btn">Dettaglio ›</button>
-            </div>
-          </div>
-          <div class="summary-phoenix" aria-hidden="true"></div>
+        <div class="gauge-wrap">
+          <svg id="petalGauge" class="petal-gauge" viewBox="0 0 350 150" role="img" aria-label="Calorie del giorno rispetto al tetto"></svg>
+          <div class="gauge-center"><strong id="kcalTotal">—</strong><span>kcal su <b id="kcalTarget">1350</b></span></div>
+        </div>
+        <div class="progress-track hero-track" hidden><div id="kcalProgress" class="progress-fill"></div></div>
+        <div class="summary-foot">
+          <span id="statusText">Seleziona le alternative</span>
+          <button type="button" id="detailBtn" class="outline-btn">Dettaglio ›</button>
         </div>
 
         <div class="macro-grid macro-grid-4" id="macroBreakdown">
@@ -87,24 +83,30 @@
             <span>Proteine</span>
             <strong><span id="proteinTotal">—</span> g</strong>
             <small><span id="proteinPct">—</span> · target <span id="proteinTargetPct">21%</span></small>
+            <i class="mbar"><b id="proteinBar"></b></i>
           </div>
           <div class="macro-item carbs">
             <span>Carboidrati</span>
             <strong><span id="carbTotal">—</span> g</strong>
             <small><span id="carbPct">—</span> · target <span id="carbTargetPct">50%</span></small>
+            <i class="mbar"><b id="carbBar"></b></i>
           </div>
           <div class="macro-item fats">
             <span>Grassi</span>
             <strong><span id="fatTotal">—</span> g</strong>
             <small><span id="fatPct">—</span> · target <span id="fatTargetPct">29%</span></small>
+            <i class="mbar"><b id="fatBar"></b></i>
           </div>
           <div class="macro-item fibers">
             <span>Fibre</span>
             <strong><span id="fiberTotal">—</span> g</strong>
             <small>/ <span id="fiberTarget">30</span> g</small>
+            <i class="mbar"><b id="fiberBar"></b></i>
           </div>
         </div>
       </section>
+
+      <button type="button" id="todayTraining" class="today-train" hidden></button>
 
       <section class="bread-card">
         <div class="bread-icon" aria-hidden="true">🍞</div>
@@ -294,8 +296,8 @@
 
 <nav class="section-nav" aria-label="Sezioni dell'app">
       <button type="button" class="tab-btn active" data-tab="meals"><span class="tab-ico">🍽️</span><span class="tab-label">Pasti</span></button>
-      <button type="button" class="tab-btn" data-tab="shopping"><span class="tab-ico">🧺</span><span class="tab-label">Lista spesa</span></button>
-      <button type="button" class="tab-btn" data-tab="training"><span class="tab-ico">🏋️</span><span class="tab-label">Allenamento</span></button>
+      <button type="button" class="tab-btn" data-tab="shopping"><span class="tab-ico">🧺</span><span class="tab-label">Spesa</span></button>
+      <button type="button" class="tab-btn" data-tab="training"><span class="tab-ico">🏋️</span><span class="tab-label">Allenamento</span><i class="tab-dot" id="trainDot" hidden></i></button>
       <button type="button" class="tab-btn" data-tab="progress"><span class="tab-ico">📊</span><span class="tab-label">Progressi</span></button>
     </nav>
 <footer>Dashboard alimentare · target 1350 kcal · scheda allenamento Blocco 2 · dati salvati sul dispositivo</footer>

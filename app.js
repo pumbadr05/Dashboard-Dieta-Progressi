@@ -522,6 +522,30 @@
   }
 
 
+  const PETAL_COLORS=['#A94A38','#B5533F','#C0624A','#C96F4F','#D17C50','#D88A4F','#DE974E','#E2A24F','#E5AC55','#E8B65C'];
+  function renderPetals(kcal,has){
+    const svg=document.getElementById('petalGauge');if(!svg)return;
+    const filled=has?Math.min(10,Math.round(kcal/TARGET*10)):0;
+    let h='';
+    for(let i=0;i<10;i++){const on=i<filled;h+=`<path d="M175 90 C165 78 165 52 175 24 C185 52 185 78 175 90Z" transform="rotate(${-81+18*i} 175 142)" fill="${on?PETAL_COLORS[i]:'#F6EBE0'}" stroke="${on?'none':'#E8D2C3'}" stroke-width="1.5"/>`;}
+    svg.innerHTML=h;
+  }
+  function plannedDayKcal(w,d){
+    const sel=getStoredSelections(w,d),bm=breadMacro(getBreadQty(w,d));
+    let p=bm.p,c=bm.c,f=bm.f;
+    ['breakfast','snack','lunch','afternoon','dinner'].forEach(id=>{
+      if(d==='sab'&&id==='dinner'){p+=pizza.p;c+=pizza.c;f+=pizza.f;return;}
+      const opts=mealOptions(w,d,id),idx=Number.isInteger(sel[id])?sel[id]:0,o=opts[idx]||opts[0];
+      if(o){p+=o.p;c+=o.c;f+=o.f;}
+    });
+    return K(p,c,f);
+  }
+  function mealDayDate(w,d){
+    const dt=new Date(CYCLE_START+'T12:00:00');
+    dt.setDate(dt.getDate()+(currentCycleNumber()-1)*28+(w-1)*7+dayIndex[d]);
+    return dt;
+  }
+
   function renderCalendar(){
     const w=currentWeek(), d=currentDay();
     const range=document.getElementById('calendarRange');
@@ -530,7 +554,9 @@
     range.textContent=weekMeta[w].range;
     wrap.innerHTML=days.map(day=>{
       const dt=weekDates[w][day.id];
-      return `<button type="button" class="calendar-day ${day.id===d?'active':''}" data-day="${day.id}" aria-pressed="${day.id===d?'true':'false'}">
+      const pct=Math.min(100,Math.round(plannedDayKcal(w,day.id)/TARGET*100));
+      const isToday=mealDayDate(w,day.id).toDateString()===new Date().toDateString();
+      return `<button type="button" class="calendar-day ${day.id===d?'active':''} ${isToday?'is-today':''}" data-day="${day.id}" style="--fill:${pct}%" aria-pressed="${day.id===d?'true':'false'}" aria-label="${day.label} ${dt.n} ${dt.m}, circa ${pct}% del tetto">
         <span>${day.label.slice(0,3).toUpperCase()}</span>
         <strong>${dt.n}</strong>
         <small>${dt.m}</small>
@@ -632,7 +658,7 @@
       card.querySelector('.meal-caret').textContent=card.classList.contains('open')?'⌃':'⌄';
     }));
     const toggleDayView=document.getElementById('toggleDayView'); if(toggleDayView) toggleDayView.textContent='Vedi giornata ›';
-    updateTotals(); updateWeekend(); renderScheduleHeader();
+    updateTotals(); updateWeekend(); renderScheduleHeader(); renderTodayTraining();
   }
 
   function updateWeekend(){
@@ -685,6 +711,8 @@
     const ratio = document.getElementById('ratioStatus');
     if(ratio) ratio.textContent=count===required?(dist<=6?'coerente':'vicino al target'):'parziale';
 
+    renderPetals(kcal,count>0);
+    [['proteinBar',p/TARGET_MACRO.p],['carbBar',c/TARGET_MACRO.c],['fatBar',f/TARGET_MACRO.f],['fiberBar',fiber/FIBER_TARGET]].forEach(([id,v])=>{const el=document.getElementById(id);if(el)el.style.width=`${count?Math.max(0,Math.min(100,Math.round(v*100))):0}%`;});
     const fill=document.getElementById('kcalProgress'),status=document.getElementById('statusText');
     const pct=count?Math.min(100,Math.round(kcal/TARGET*100)):0;
     fill.style.width=`${pct}%`;
@@ -787,6 +815,9 @@ localStorage.setItem(storeKey(currentWeek(),currentDay()),JSON.stringify(getSele
     const name=profiles[activeProfile]?.name||'Federica';
     const title=document.getElementById('progressProfileName');
     if(title) title.textContent=name;
+    const hn=document.getElementById('heroName');if(hn)hn.textContent=name;
+    const hd=document.getElementById('heroDate');
+    if(hd){const t=new Date();hd.textContent=`${['DOMENICA','LUNEDÌ','MARTEDÌ','MERCOLEDÌ','GIOVEDÌ','VENERDÌ','SABATO'][t.getDay()]} ${t.getDate()} ${monthNames[t.getMonth()].toUpperCase()}`;}
   }
   function switchProfile(profile){
     if(!profiles[profile]||profile===activeProfile)return;
@@ -1058,7 +1089,7 @@ localStorage.setItem(storeKey(currentWeek(),currentDay()),JSON.stringify(getSele
     const w=trainWeek;
     const days=trainDayIds.map(id=>{
       const dt=trainDate(w,id),done=!!(log[`w${w}_${id}`]&&log[`w${w}_${id}`].done);
-      return `<button type="button" class="calendar-day tr-day ${id===trainDay?'active':''} ${done?'tr-done-day':''}" data-tr-day="${id}" aria-pressed="${id===trainDay?'true':'false'}">
+      return `<button type="button" class="calendar-day tr-day ${id===trainDay?'active':''} ${done?'tr-done-day':''}" data-tr-day="${id}" style="--fill:${done?100:0}%" aria-pressed="${id===trainDay?'true':'false'}">
         <span>${id.toUpperCase()}${done?' ✓':''}</span><strong>${dt.getDate()}</strong><small>${trainDayLabels[id]}</small></button>`;
     }).join('');
     const info=trainWeekInfo[w-1],status=trainStatusNote();
@@ -1077,7 +1108,7 @@ localStorage.setItem(storeKey(currentWeek(),currentDay()),JSON.stringify(getSele
   function trainHead(day,title,sub,optionalDone,entry){
     const dt=trainDate(trainWeek,day);
     const check=(trainKind[day]||optionalDone)?`<label class="tr-done"><input type="checkbox" data-tr-done ${entry.done?'checked':''}><span>${entry.done?'Fatta':'Segna fatta'}</span></label>`:'';
-    return `<div class="tr-head"><div><span class="section-mini">${trainDayNames[day].toUpperCase()} ${dt.getDate()} ${monthNames[dt.getMonth()].toUpperCase()}</span><h2>${esc(title)}</h2>${sub?`<p class="micro">${esc(sub)}</p>`:''}</div>${check}</div>`;
+    return `<div class="tr-head"><div><span class="section-mini">${trainDayNames[day].toUpperCase()} ${dt.getDate()} ${monthNames[dt.getMonth()].toUpperCase()}</span><h2>${trainTitleHtml(title)}</h2>${sub?`<p class="micro">${esc(sub)}</p>`:''}</div>${check}</div>`;
   }
 
   function renderTrainWorkout(log,key){
@@ -1144,6 +1175,41 @@ localStorage.setItem(storeKey(currentWeek(),currentDay()),JSON.stringify(getSele
       <p>Se un giorno sei molto stanca, tieni la seduta ma riduci di una serie per esercizio.</p>
     </details>`;
 
+
+  const FAN_SVG='<svg width="58" height="40" viewBox="0 0 58 40" aria-hidden="true"><g fill="#E3AE57">'+[-60,-30,0,30,60].map(r=>`<path d="M29 36 C25 31 25 17 29 3 C33 17 33 31 29 36Z"${r?` transform="rotate(${r} 29 36)"`:''}/>`).join('')+'</g></svg>';
+  function trainTitleHtml(t){const w=String(t).split(' ');return w.length===1?`<i>${esc(t)}</i>`:`${esc(w[0])} <i>${esc(w.slice(1).join(' '))}</i>`;}
+  function renderTodayTraining(){
+    const el=document.getElementById('todayTraining');if(!el)return;
+    if(activeProfile!=='federica'){el.hidden=true;return;}
+    const dt=mealDayDate(currentWeek(),currentDay());
+    const diff=Math.round((dt-new Date(TRAIN_START+'T12:00:00'))/86400000);
+    if(diff>=TRAIN_WEEKS*7){el.hidden=true;return;}
+    let label,title,sub,w=1,day='lun',done=false;
+    if(diff<0){label='ALLENAMENTO';title='Blocco 2 dal 19 ottobre';sub='Tocca per vedere la scheda';}
+    else{
+      w=Math.floor(diff/7)+1;day=trainDayIds[diff%7];
+      const kind=trainKind[day],isToday=dt.toDateString()===new Date().toDateString();
+      label=isToday?'ALLENAMENTO DI OGGI':`ALLENAMENTO · ${trainDayNames[day].toUpperCase()}`;
+      if(kind==='P'){title='Punch';sub='45–55 min · RPE 6–7';}
+      else if(kind){title=WORKOUTS[kind].title;sub=`${WORKOUTS[kind].ex.length} esercizi · ${WORKOUTS[kind].dur}`;}
+      else{title=trainFreeDays[day].title;sub=trainOptional[day]?'Facoltativo':'';}
+      const e=getTrainLog()[`w${w}_${day}`];done=!!(e&&e.done);
+    }
+    el.dataset.w=String(w);el.dataset.day=day;
+    el.innerHTML=`<span class="today-train-copy"><span class="today-train-label">${label}</span><span class="today-train-title">${trainTitleHtml(title)}</span>${sub||done?`<span class="today-train-sub">${done?'✓ Fatta':esc(sub)}</span>`:''}</span><span class="today-train-fan">${FAN_SVG}</span>`;
+    el.hidden=false;
+  }
+  function updateTrainDot(){
+    const dot=document.getElementById('trainDot');if(!dot)return;
+    if(activeProfile!=='federica'||trainNow.diff<0||trainNow.diff>=TRAIN_WEEKS*7){dot.hidden=true;return;}
+    const day=trainNow.day,e=getTrainLog()[`w${trainNow.w}_${day}`];
+    dot.hidden=!(trainKind[day]&&!(e&&e.done));
+  }
+  (function initTodayTraining(){
+    const el=document.getElementById('todayTraining');if(!el)return;
+    el.addEventListener('click',()=>{trainWeek=Number(el.dataset.w)||1;trainDay=el.dataset.day||'lun';setTab('training');window.scrollTo({top:0,behavior:'smooth'});});
+  })();
+
   function renderTraining(){
     const body=document.getElementById('trainingBody');
     if(!body)return;
@@ -1151,11 +1217,13 @@ localStorage.setItem(storeKey(currentWeek(),currentDay()),JSON.stringify(getSele
     if(nameEl)nameEl.textContent=profiles[activeProfile].name;
     if(activeProfile!=='federica'){
       body.innerHTML='<section class="tr-card"><p class="empty-state">La scheda di allenamento è quella di Federica. Passa al profilo Federica per vederla e segnare le sedute.</p></section>';
+      updateTrainDot();renderTodayTraining();
       return;
     }
     const log=getTrainLog(),kind=trainKind[trainDay];
     const detail=kind==='P'?renderTrainPunch(log):(kind?renderTrainWorkout(log,kind):renderTrainFree(log));
     body.innerHTML=renderTrainWeek(log)+detail+TRAIN_INFO;
+    updateTrainDot();renderTodayTraining();
   }
 
   (function initTraining(){
@@ -1244,5 +1312,5 @@ localStorage.setItem(storeKey(currentWeek(),currentDay()),JSON.stringify(getSele
   });
 
   renderProgress();renderPhotos();renderShopping();renderTraining();
-  if('serviceWorker'in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('sw.js').catch(()=>{});
+  if('serviceWorker'in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('sw.js',{updateViaCache:'none'}).then(reg=>{reg.update().catch(()=>{});}).catch(()=>{});
 })();

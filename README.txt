@@ -1,4 +1,4 @@
-DASHBOARD ALIMENTARE V15 — 1350 KCAL + ALLENAMENTO
+DASHBOARD ALIMENTARE V16 — 1350 KCAL + ALLENAMENTO + REDESIGN
 
 Nuovo ciclo:
 - partenza: 12 ottobre 2026
@@ -26,3 +26,16 @@ NOVITÀ V15 — SCHEDA ALLENAMENTO:
 - serie, RPE e durata del finisher cambiano in base alla settimana (scarico alla settimana 6)
 - per ogni esercizio puoi segnare il carico usato e se è fatto; il carico della settimana precedente compare come promemoria
 - la scheda è visibile solo nel profilo Federica; i dati di allenamento sono salvati sul dispositivo e separati per profilo
+
+NOVITÀ V16 — REDESIGN "FENICE CALDA" (tutte le sezioni):
+- intestazione con saluto personalizzato e selettore profilo F/D
+- striscia settimana a "candele" (riempite in base alle kcal pianificate del giorno)
+- ventaglio di 10 petali al posto della barra: ogni petalo vale circa il 10% del tetto di 1350 kcal
+- nuovo blocco "Allenamento di oggi" nella tab Pasti: un tocco apre la scheda del giorno (solo profilo Federica)
+- puntino sul tab Allenamento quando oggi c'è una seduta da fare
+- schede con angoli organici, nuova palette (crema, prugna, brace, oro) su Pasti, Spesa, Allenamento e Progressi
+- i font restano di sistema/Georgia, così l'app funziona anche offline
+
+V16.1 — AGGIORNAMENTI AUTOMATICI:
+- il service worker ora scarica prima i file dalla rete e usa la cache solo se sei offline
+- ogni aggiornamento pubblicato arriva alla riapertura successiva, senza cancellare i dati del sito
