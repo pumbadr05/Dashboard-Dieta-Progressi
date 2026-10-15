@@ -39,3 +39,11 @@ NOVITÀ V16 — REDESIGN "FENICE CALDA" (tutte le sezioni):
 V16.1 — AGGIORNAMENTI AUTOMATICI:
 - il service worker ora scarica prima i file dalla rete e usa la cache solo se sei offline
 - ogni aggiornamento pubblicato arriva alla riapertura successiva, senza cancellare i dati del sito
+
+V16.2 — STRUTTURA IDENTICA AL MOCKUP (tab Pasti):
+- ordine: intestazione, striscia dei giorni, ventaglio con kcal rimaste e barre macro, pasti, allenamento, pane, stagione
+- nuova funzione "Fatto": ogni pasto si può segnare come fatto; i pasti fatti diventano etichette verdi, il prossimo pasto è la card grande con A/B/C, Fatto e Scegli, gli altri sono card piccole
+- il ventaglio e le candele della settimana si riempiono con le kcal dei pasti fatti
+- "Dettaglio" mostra il piano completo del giorno (kcal, % macro, fibre)
+- all'apertura l'app mostra il giorno di oggi
+- i pasti fatti sono salvati sul dispositivo, separati per profilo

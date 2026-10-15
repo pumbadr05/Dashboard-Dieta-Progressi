@@ -15,7 +15,6 @@
   <main class="app-shell">
     <header class="hero">
       <div class="hero-row">
-        <img src="icons/icon-192.png" alt="" class="brand-icon">
         <div class="hero-copy">
           <span class="hero-eyebrow" id="heroDate">—</span>
           <h1>Ciao, <i id="heroName">Federica</i></h1>
@@ -27,7 +26,6 @@
           </div>
         </div>
       </div>
-      <p class="subtitle">Il tuo percorso per rinascere come una fenice, ogni giorno.</p>
     </header>
 <section id="mealsPanel" class="tab-panel">
       <section class="calendar-card" aria-label="Calendario settimanale">
@@ -67,18 +65,21 @@
       <section class="today-card mockup-summary" aria-label="Riepilogo nutrizionale">
         <div class="summary-heading">
           <span class="today-label" id="dayTitle">OGGI</span>
+          <button type="button" id="detailBtn" class="text-btn">Dettaglio ›</button>
         </div>
         <div class="gauge-wrap">
-          <svg id="petalGauge" class="petal-gauge" viewBox="0 0 350 150" role="img" aria-label="Calorie del giorno rispetto al tetto"></svg>
-          <div class="gauge-center"><strong id="kcalTotal">—</strong><span>kcal su <b id="kcalTarget">1350</b></span></div>
+          <svg id="petalGauge" class="petal-gauge" viewBox="0 0 350 150" role="img" aria-label="Calorie già consumate rispetto al tetto"></svg>
+          <div class="gauge-center"><strong id="kcalLeft">—</strong><span>kcal rimaste su <b id="kcalTarget">1350</b></span></div>
         </div>
-        <div class="progress-track hero-track" hidden><div id="kcalProgress" class="progress-fill"></div></div>
-        <div class="summary-foot">
-          <span id="statusText">Seleziona le alternative</span>
-          <button type="button" id="detailBtn" class="outline-btn">Dettaglio ›</button>
+        <div class="macro-bars" id="macroBars">
+          <div class="mb"><div class="mb-top"><b>Proteine</b><span id="mbProteinVal">—</span></div><i class="mbar"><b id="mbProteinBar"></b></i></div>
+          <div class="mb"><div class="mb-top"><b>Carbo</b><span id="mbCarbVal">—</span></div><i class="mbar"><b id="mbCarbBar"></b></i></div>
+          <div class="mb"><div class="mb-top"><b>Grassi</b><span id="mbFatVal">—</span></div><i class="mbar"><b id="mbFatBar"></b></i></div>
         </div>
-
-        <div class="macro-grid macro-grid-4" id="macroBreakdown">
+        <div class="day-detail" id="macroBreakdown" hidden>
+          <p class="day-detail-line"><b>Piano del giorno:</b> <strong id="kcalTotal">—</strong> kcal · <span id="statusText">Seleziona le alternative</span></p>
+          <div class="progress-track hero-track" hidden><div id="kcalProgress" class="progress-fill"></div></div>
+          <div class="macro-grid macro-grid-4">
           <div class="macro-item protein">
             <span>Proteine</span>
             <strong><span id="proteinTotal">—</span> g</strong>
@@ -104,6 +105,17 @@
             <i class="mbar"><b id="fiberBar"></b></i>
           </div>
         </div>
+        </div>
+      </section>
+
+      <section class="meals-section">
+        <div class="meals-section-head">
+          <div>
+            <span class="section-mini">I TUOI PASTI</span>
+          </div>
+          <button type="button" id="toggleDayView" class="text-btn">Vedi giornata ›</button>
+        </div>
+        <section class="meal-list" id="mealList" aria-live="polite"></section>
       </section>
 
       <button type="button" id="todayTraining" class="today-train" hidden></button>
@@ -118,16 +130,6 @@
       </section>
 
       <section id="weekendNotice" class="weekend-notice" hidden></section>
-
-      <section class="meals-section">
-        <div class="meals-section-head">
-          <div>
-            <span class="section-mini">I TUOI PASTI</span>
-          </div>
-          <button type="button" id="toggleDayView" class="text-btn">Vedi giornata ›</button>
-        </div>
-        <section class="meal-list" id="mealList" aria-live="polite"></section>
-      </section>
 
       <section class="season-panel">
         <div class="section-head">

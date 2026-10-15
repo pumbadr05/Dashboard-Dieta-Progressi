@@ -1,4 +1,4 @@
-const CACHE='dashboard-alimentare-v16-1-20261014';
+const CACHE='dashboard-alimentare-v16-2-20261015';
 const FILES=['./','./index.html','./styles.css','./app.js','./manifest.webmanifest','./icons/icon-192.png','./icons/icon-512.png'];
 // Installazione: scarica sempre i file dalla rete (ignora la cache HTTP) e li tiene per l'uso offline.
 self.addEventListener('install',e=>{

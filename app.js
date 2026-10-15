@@ -554,7 +554,7 @@
     range.textContent=weekMeta[w].range;
     wrap.innerHTML=days.map(day=>{
       const dt=weekDates[w][day.id];
-      const pct=Math.min(100,Math.round(plannedDayKcal(w,day.id)/TARGET*100));
+      const pct=Math.min(100,Math.round(consumedDayKcal(w,day.id)/TARGET*100));
       const isToday=mealDayDate(w,day.id).toDateString()===new Date().toDateString();
       return `<button type="button" class="calendar-day ${day.id===d?'active':''} ${isToday?'is-today':''}" data-day="${day.id}" style="--fill:${pct}%" aria-pressed="${day.id===d?'true':'false'}" aria-label="${day.label} ${dt.n} ${dt.m}, circa ${pct}% del tetto">
         <span>${day.label.slice(0,3).toUpperCase()}</span>
@@ -590,54 +590,65 @@
   }
 
 
+  // ----- stato "pasto fatto" (per profilo, settimana, giorno) -----
+  const MEAL_IDS=['breakfast','snack','lunch','afternoon','dinner'];
+  let focusMeal=null,lastMealKey='';
+  const doneKey=()=>`mealsDone_v1_${activeProfile}`;
+  function getDone(){try{const v=JSON.parse(localStorage.getItem(doneKey())||'{}');return v&&typeof v==='object'?v:{}}catch(e){return {}}}
+  function setDone(o){localStorage.setItem(doneKey(),JSON.stringify(o));}
+  const doneId=(w,d,id)=>`${w}_${d}_${id}`;
+  function chosenOption(w,d,id,sel){
+    if(d==='sab'&&id==='dinner')return pizza;
+    const opts=mealOptions(w,d,id),i=Number.isInteger(sel[id])?sel[id]:0;
+    return opts[i]||opts[0];
+  }
+  function consumedDayKcal(w,d){
+    const sel=getStoredSelections(w,d),done=getDone();let k=0;
+    MEAL_IDS.forEach(id=>{if(done[doneId(w,d,id)]){const o=chosenOption(w,d,id,sel);if(o)k+=o.kcal;}});
+    return k;
+  }
+  function renderConsumption(){
+    const w=currentWeek(),d=currentDay(),sel=getStoredSelections(w,d),done=getDone(),bm=breadMacro(getBreadQty(w,d));
+    let p=bm.p,c=bm.c,f=bm.f;
+    MEAL_IDS.forEach(id=>{if(done[doneId(w,d,id)]){const o=chosenOption(w,d,id,sel);if(o){p+=o.p;c+=o.c;f+=o.f;}}});
+    const kcal=K(p,c,f),left=Math.max(0,TARGET-kcal);
+    const L=document.getElementById('kcalLeft');if(L)L.textContent=left;
+    renderPetals(kcal,true);
+    const fmt=v=>Math.round(v);
+    [['Protein',p,TARGET_MACRO.p],['Carb',c,TARGET_MACRO.c],['Fat',f,TARGET_MACRO.f]].forEach(([n,v,t])=>{
+      const val=document.getElementById(`mb${n}Val`),bar=document.getElementById(`mb${n}Bar`);
+      if(val)val.textContent=`${fmt(v)}/${t} g`;
+      if(bar)bar.style.width=`${Math.max(0,Math.min(100,Math.round(v/t*100)))}%`;
+    });
+  }
+
   function renderMeals(){
-    const w=currentWeek(),d=currentDay(),sel=getStoredSelections(w,d);
-    const slots=[
-      ['breakfast','Colazione','☀️'],
-      ['snack','Metà mattina','🍎'],
-      ['lunch','Pranzo','🌤️'],
-      ['afternoon','Merenda','🍐'],
-      ['dinner','Cena','🌙']
-    ];
-    list.innerHTML=slots.map(([id,title,icon],pos)=>{
-      const opts=mealOptions(w,d,id);
-      if(d==='sab'&&id==='dinner'){
-        const o=opts[0];
-        return `<article class="meal-card fixed-meal open" data-meal="${id}">
-          <button type="button" class="meal-head meal-toggle" aria-expanded="true">
-            <div class="meal-head-main"><span class="meal-icon">${icon}</span><div><span class="meal-name">${title}</span><small>${o.kcal} kcal</small></div></div>
-            <span class="meal-caret">⌃</span>
-          </button>
-          <div class="meal-body"><div class="option-list single-option">
-            <label class="meal-option">
-              <input type="radio" name="${id}" value="0" checked disabled>
-              <span class="option-body fixed">
-                <span class="option-letter">🍕</span>
-                <span class="option-text"><strong>${o.name}</strong><small>${o.detail}</small><span class="source-badge">Consigliata</span></span>
-                <span class="option-macro"><b>${o.kcal} kcal</b></span>
-              </span>
-            </label>
-          </div></div></article>`;
-      }
-      const open = pos===0 ? ' open' : '';
-      const expanded = pos===0 ? 'true' : 'false';
-      const chosenIdx = Number.isInteger(sel[id]) ? sel[id] : 0;
-      const chosenKcal = opts[chosenIdx]?.kcal || opts[0]?.kcal || '—';
-      return `<article class="meal-card${open}" data-meal="${id}">
-        <button type="button" class="meal-head meal-toggle" aria-expanded="${expanded}">
-          <div class="meal-head-main"><span class="meal-icon">${icon}</span><div><span class="meal-name">${title}</span><small>${chosenKcal} kcal</small></div></div>
-          <span class="meal-caret">${pos===0?'⌃':'⌄'}</span>
+    const w=currentWeek(),d=currentDay(),sel=getStoredSelections(w,d),done=getDone();
+    const key=`${w}_${d}`;
+    if(key!==lastMealKey){focusMeal=null;lastMealKey=key;}
+    const slots=[['breakfast','Colazione'],['snack','Metà mattina'],['lunch','Pranzo'],['afternoon','Merenda'],['dinner','Cena']];
+    const isDone=id=>!!done[doneId(w,d,id)];
+    const activeId=(focusMeal&&!isDone(focusMeal))?focusMeal:(MEAL_IDS.find(id=>!isDone(id))||null);
+    list.classList.toggle('all-done',!activeId);
+    list.innerHTML=slots.map(([id,title])=>{
+      const opts=mealOptions(w,d,id),fixed=d==='sab'&&id==='dinner';
+      const state=isDone(id)?'is-done':(id===activeId?'is-active':'is-compact');
+      const chosenIdx=Number.isInteger(sel[id])?sel[id]:0;
+      const o=fixed?opts[0]:(opts[chosenIdx]||opts[0]);
+      const chips=fixed?'<span class="alt-chip on" aria-hidden="true">🍕</span>':opts.map((x,i)=>{const L=String.fromCharCode(65+i);return `<button type="button" class="alt-chip ${i===chosenIdx?'on':''}" data-alt="${i}" aria-label="${title}: alternativa ${L}">${L}</button>`;}).join('');
+      const body=fixed
+        ?`<div class="option-list single-option"><label class="meal-option"><input type="radio" name="${id}" value="0" checked disabled><span class="option-body fixed"><span class="option-letter">🍕</span><span class="option-text"><strong>${o.name}</strong><small>${o.detail}</small><span class="source-badge">Consigliata</span></span><span class="option-macro"><b>${o.kcal} kcal</b></span></span></label></div>`
+        :`<div class="option-list">${opts.map((x,i)=>`<label class="meal-option"><input type="radio" name="${id}" value="${i}" ${i===chosenIdx?'checked':''} aria-label="${title}: alternativa ${String.fromCharCode(65+i)}"><span class="option-body"><span class="option-top"><span class="option-letter">${String.fromCharCode(65+i)}</span><span class="option-check">${i===chosenIdx?'✓':'○'}</span></span><span class="option-text"><strong>${x.name}</strong><small>${x.detail}</small>${x.source?'<span class="source-badge">Consigliata</span>':''}</span><span class="option-cal">${x.kcal} kcal</span></span></label>`).join('')}</div>`;
+      return `<article class="meal-card ${state}${fixed?' fixed-meal':''}" data-meal="${id}">
+        <button type="button" class="meal-head meal-toggle" aria-label="${isDone(id)?title+': fatto, tocca per modificare':title}">
+          <span class="mh-check" aria-hidden="true">✓</span><span class="meal-name">${title}</span><small>${o.kcal} kcal</small>
         </button>
-        <div class="meal-body">
-          <div class="option-list">${opts.map((o,i)=>`<label class="meal-option">
-            <input type="radio" name="${id}" value="${i}" ${sel[id]===i || (!Number.isInteger(sel[id]) && i===0)?'checked':''} aria-label="${title}: alternativa ${String.fromCharCode(65+i)}">
-            <span class="option-body">
-              <span class="option-top"><span class="option-letter">${String.fromCharCode(65+i)}</span><span class="option-check">${(sel[id]===i || (!Number.isInteger(sel[id]) && i===0))?'✓':'○'}</span></span>
-              <span class="option-text"><strong>${o.name}</strong><small>${o.detail}</small>${o.source?'<span class="source-badge">Consigliata</span>':''}</span>
-              <span class="option-cal">${o.kcal} kcal</span>
-            </span>
-          </label>`).join('')}</div>
+        <div class="meal-actions">
+          <div class="alt-chips">${chips}</div><span class="meal-actions-gap"></span>
+          <button type="button" class="meal-done-btn" data-done>✓ Fatto</button>
+          ${fixed?'':'<button type="button" class="meal-choose-btn" data-choose>Scegli</button>'}
         </div>
+        <div class="meal-body">${body}</div>
       </article>`;
     }).join('');
 
@@ -649,16 +660,29 @@
       const opts=mealOptions(w,d,card?.dataset.meal);
       if(headSmall && checked && opts[Number(checked.value)]) headSmall.textContent=`${opts[Number(checked.value)].kcal} kcal`;
       card?.querySelectorAll('.option-check').forEach((n,ix)=>n.textContent=ix===Number(el.value)?'✓':'○');
-      updateTotals();
-      renderShopping();
+      card?.querySelectorAll('.alt-chip[data-alt]').forEach(ch=>ch.classList.toggle('on',Number(ch.dataset.alt)===Number(el.value)));
+      updateTotals(); renderConsumption(); renderShopping(); renderScheduleHeader();
+    }));
+    list.querySelectorAll('.alt-chip[data-alt]').forEach(ch=>ch.addEventListener('click',()=>{
+      const card=ch.closest('.meal-card'),r=card.querySelector(`input[value="${ch.dataset.alt}"]`);
+      if(r&&!r.checked){r.checked=true;r.dispatchEvent(new Event('change',{bubbles:true}));}
     }));
     list.querySelectorAll('.meal-toggle').forEach(btn=>btn.addEventListener('click',()=>{
-      const card=btn.closest('.meal-card');
-      toggleMealCard(card);
-      card.querySelector('.meal-caret').textContent=card.classList.contains('open')?'⌃':'⌄';
+      const card=btn.closest('.meal-card'),id=card.dataset.meal;
+      if(card.classList.contains('is-active'))return;
+      if(card.classList.contains('is-done')){const dn=getDone();delete dn[doneId(w,d,id)];setDone(dn);}
+      focusMeal=id;renderMeals();
     }));
-    const toggleDayView=document.getElementById('toggleDayView'); if(toggleDayView) toggleDayView.textContent='Vedi giornata ›';
-    updateTotals(); updateWeekend(); renderScheduleHeader(); renderTodayTraining();
+    list.querySelectorAll('[data-done]').forEach(btn=>btn.addEventListener('click',()=>{
+      const id=btn.closest('.meal-card').dataset.meal,dn=getDone();
+      dn[doneId(w,d,id)]=true;setDone(dn);focusMeal=null;renderMeals();
+    }));
+    list.querySelectorAll('[data-choose]').forEach(btn=>btn.addEventListener('click',()=>{
+      const card=btn.closest('.meal-card');card.classList.toggle('opts-open');
+      btn.textContent=card.classList.contains('opts-open')?'Chiudi':'Scegli';
+    }));
+    const toggleDayView=document.getElementById('toggleDayView'); if(toggleDayView) toggleDayView.textContent=list.classList.contains('show-all')?'Chiudi giornata ‹':'Vedi giornata ›';
+    updateTotals(); renderConsumption(); updateWeekend(); renderScheduleHeader(); renderTodayTraining();
   }
 
   function updateWeekend(){
@@ -689,7 +713,8 @@
     const kcal=K(p,c,f);
     const fiber=estimateFiberForSelection(w,d,sel);
 
-    document.getElementById('dayTitle').textContent=`OGGI, ${dayFullDate(w,d).split(', ')[1].toUpperCase()}`;
+    const _dp=dayFullDate(w,d).split(', '),_isToday=mealDayDate(w,d).toDateString()===new Date().toDateString();
+    document.getElementById('dayTitle').textContent=_isToday?`OGGI, ${_dp[1].toUpperCase()}`:`${_dp[0].toUpperCase()} ${_dp[1].toUpperCase()}`;
     document.getElementById('breadQty').textContent=`${breadQty} g`;
     document.getElementById('kcalTarget').textContent=TARGET;
     document.getElementById('kcalTotal').textContent=count?kcal:'—';
@@ -711,7 +736,6 @@
     const ratio = document.getElementById('ratioStatus');
     if(ratio) ratio.textContent=count===required?(dist<=6?'coerente':'vicino al target'):'parziale';
 
-    renderPetals(kcal,count>0);
     [['proteinBar',p/TARGET_MACRO.p],['carbBar',c/TARGET_MACRO.c],['fatBar',f/TARGET_MACRO.f],['fiberBar',fiber/FIBER_TARGET]].forEach(([id,v])=>{const el=document.getElementById(id);if(el)el.style.width=`${count?Math.max(0,Math.min(100,Math.round(v*100))):0}%`;});
     const fill=document.getElementById('kcalProgress'),status=document.getElementById('statusText');
     const pct=count?Math.min(100,Math.round(kcal/TARGET*100)):0;
@@ -1261,6 +1285,7 @@ localStorage.setItem(storeKey(currentWeek(),currentDay()),JSON.stringify(getSele
 
   // INIT
   weekSelect.value=String(autoWeekFromToday());
+  daySelect.value=trainDayIds[(new Date().getDay()+6)%7];
   renderProfileUI();
   document.querySelectorAll('.profile-btn').forEach(btn=>btn.addEventListener('click',()=>switchProfile(btn.dataset.profile)));
   renderVeg('ottobre');
@@ -1294,21 +1319,16 @@ localStorage.setItem(storeKey(currentWeek(),currentDay()),JSON.stringify(getSele
   });
 
   const detailBtn=document.getElementById('detailBtn');
-  if(detailBtn) detailBtn.addEventListener('click',()=>document.getElementById('macroBreakdown')?.scrollIntoView({behavior:'smooth',block:'center'}));
+  if(detailBtn) detailBtn.addEventListener('click',()=>{
+    const box=document.getElementById('macroBreakdown');if(!box)return;
+    box.hidden=!box.hidden;
+    detailBtn.textContent=box.hidden?'Dettaglio ›':'Chiudi ‹';
+  });
 
   const toggleDayView=document.getElementById('toggleDayView');
   if(toggleDayView) toggleDayView.addEventListener('click',()=>{
-    const cards=[...document.querySelectorAll('#mealList .meal-card')];
-    const allOpen=cards.every(c=>c.classList.contains('open'));
-    cards.forEach((card,idx)=>{
-      if(allOpen && idx>0) card.classList.remove('open');
-      else card.classList.add('open');
-      const btn=card.querySelector('.meal-toggle');
-      if(btn) btn.setAttribute('aria-expanded', card.classList.contains('open') ? 'true':'false');
-      const caret=card.querySelector('.meal-caret');
-      if(caret) caret.textContent=card.classList.contains('open') ? '⌃' : '⌄';
-    });
-    toggleDayView.textContent=allOpen?'Vedi giornata ›':'Chiudi giornata ‹';
+    const on=list.classList.toggle('show-all');
+    toggleDayView.textContent=on?'Chiudi giornata ‹':'Vedi giornata ›';
   });
 
   renderProgress();renderPhotos();renderShopping();renderTraining();
